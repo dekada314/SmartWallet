@@ -1,5 +1,5 @@
 categories:
-  - id: food
+  food:
     name: еда
     description: Покупка еды, кафе, фастфуд, рестораны
     examples:
@@ -8,16 +8,16 @@ categories:
       - пицца
       - продукты
 
-  - id: transport
+  transport:
     name: транспорт
     description: Различные поездки и транспортные расходы
     examples:
       - автобус
       - метро
-      - трамвай
+      - трамвай 
       - троллейбус
 
-  - id: education
+  education:
     name: образование
     description: Учебные подписки, курсы, книги
     examples:
@@ -25,7 +25,7 @@ categories:
       - курс
       - вебинар
 
-  - id: entertainment
+  entertainment:
     name: развлечения
     description: Игры, кино
     examples:
