@@ -1,3 +1,27 @@
-1051124486:
-  categories: {}
-  name: пупсик
+users:
+  981275029:
+    categories:
+      education: []
+      entertainment: []
+      food: []
+      transport: []
+    name: Анастасия
+  1051124486:
+    categories:
+      education:
+      - amount: 250.0
+        category: education
+        data: March 09 2026 - 23:28:23
+        description: ''
+        transaction_id: 792c73d5-64b8-4c4b-9399-c81c783f2799
+        type: income
+      entertainment: []
+      food:
+      - amount: 25123.0
+        category: food
+        data: March 09 2026 - 23:31:25
+        description: ''
+        transaction_id: 0738a45d-1ed7-4d81-9ee5-61a72f729a6d
+        type: income
+      transport: []
+    name: пупсик
