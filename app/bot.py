@@ -1,6 +1,7 @@
 import asyncio
 import os
 
+import yaml
 from aiogram import Bot, Dispatcher, types
 from aiogram.filters import Command
 from aiogram.types import (
@@ -13,6 +14,8 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+YAML_CATEGORIES = '../knowledge_base/categories.yml'
+
 
 bot = Bot(os.getenv('TOKEN'))
 dp = Dispatcher()
@@ -22,6 +25,7 @@ reply_keyboard = ReplyKeyboardMarkup(
         [KeyboardButton(text = "Твоя статистика")],
         [KeyboardButton(text = "Ввести расход"), KeyboardButton(text = "Ввести доход")],
         [KeyboardButton(text = "Помощь")],
+        [KeyboardButton(text = "еда")],
     ],
     resize_keyboard = True
 )
@@ -60,8 +64,18 @@ async def help(message: types.Message):
         reply_markup=inline_keyboad
     )
 
+    
+@dp.message(lambda message: message.text == 'еда')
+async def food(message: types.Message):
+    with open(YAML_CATEGORIES, 'r') as file:
+        categories = yaml.safe_load(file)
+    await message.answer(
+        categories['categories'][0]['id']
+    )
+    
+    
 @dp.message()
-async def echo(message: types.Message):
+async def unknown_command(message: types.Message):
     await message.answer("Такой команды нет")
 
 async def main():
