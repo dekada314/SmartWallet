@@ -1,0 +1,33 @@
+categories:
+  - id: food
+    name: еда
+    description: Покупка еды, кафе, фастфуд, рестораны
+    examples:
+      - кофе
+      - шаурма
+      - пицца
+      - продукты
+
+  - id: transport
+    name: транспорт
+    description: Различные поездки и транспортные расходы
+    examples:
+      - автобус
+      - метро
+      - трамвай
+      - троллейбус
+
+  - id: education
+    name: образование
+    description: Учебные подписки, курсы, книги
+    examples:
+      - книга
+      - курс
+      - вебинар
+
+  - id: entertainment
+    name: развлечения
+    description: Игры, кино
+    examples:
+      - игры
+      - кино
