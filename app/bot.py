@@ -14,7 +14,8 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-YAML_CATEGORIES = '../knowledge_base/categories.yml'
+YAML_CATEGORIES = 'knowledge_base/categories.yml'
+YAML_USERS = 'knowledge_base/users.yml'
 
 
 bot = Bot(os.getenv('TOKEN'))
@@ -36,8 +37,29 @@ inline_keyboad = InlineKeyboardMarkup(
     ]
 )
 
+def save_user(user: dict):
+    with open(YAML_USERS, 'w') as file:
+        yaml.safe_dump(user, file, allow_unicode=True)
+
+def get_or_create_user(user_id: int, user_first_name: str):
+    with open(YAML_USERS, 'r') as file:
+        users = yaml.safe_load(file)
+        
+    if user_id not in users['users']:
+        user = {user_id: {'name': user_first_name,
+                            'categories': {'food': {}, }}}
+        
+        save_user(user)
+
+        
+
 @dp.message(Command('start'))
 async def start_handler(message: types.Message):
+    user_id = message.from_user.id
+    first_name = message.from_user.first_name
+    
+    get_or_create_user(user_id=user_id, user_first_name=first_name)
+    
     await message.answer(
         "Привет! Я бот 💰\n\n"
         "Доступные команды:\n"
@@ -64,19 +86,17 @@ async def help(message: types.Message):
         reply_markup=inline_keyboad
     )
 
-    
 @dp.message(lambda message: message.text == 'еда')
 async def food(message: types.Message):
     with open(YAML_CATEGORIES, 'r') as file:
         categories = yaml.safe_load(file)
     await message.answer(
-        categories['categories'][0]['id']
+        categories['categories']['food']['description']
     )
     
-    
-@dp.message()
-async def unknown_command(message: types.Message):
-    await message.answer("Такой команды нет")
+# @dp.message()
+# async def unknown_command(message: types.Message):
+#     await message.answer("Такой команды нет")
 
 async def main():
     await dp.start_polling(bot)
