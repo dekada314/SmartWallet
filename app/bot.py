@@ -1,11 +1,16 @@
+# python3 -m SmartWallet.app.bot
+ 
 import asyncio
 import datetime
 import os
 import uuid
 
 import yaml
-from aiogram import Bot, Dispatcher, types
+from aiogram import Bot, Dispatcher, Router, types
 from aiogram.filters import Command
+from aiogram.fsm.context import FSMContext
+from aiogram.fsm.state import State, StatesGroup
+from aiogram.fsm.storage.memory import MemoryStorage
 from aiogram.types import (
     InlineKeyboardButton,
     InlineKeyboardMarkup,
@@ -14,14 +19,20 @@ from aiogram.types import (
 )
 from dotenv import load_dotenv
 
+from ..model.model import SkClassifier
+from ..utils.text_processing import noun_searcher, number_searcher
+
 load_dotenv()
 
-YAML_CATEGORIES = 'knowledge_base/categories.yml'
-YAML_USERS = 'knowledge_base/users.yml'
+YAML_CATEGORIES = 'SmartWallet/knowledge_base/categories.yml'
+YAML_USERS = 'SmartWallet/knowledge_base/users.yml'
 
 
 bot = Bot(os.getenv('TOKEN'))
-dp = Dispatcher()
+dp = Dispatcher(storage=MemoryStorage())
+
+main_router = Router()
+expense_router = Router()
 
 reply_keyboard = ReplyKeyboardMarkup(
     keyboard = [
@@ -39,9 +50,16 @@ inline_keyboad = InlineKeyboardMarkup(
     ]
 )
 
+class ExpenseForm(StatesGroup):
+    waiting_for_callback = State()
+
 def get_users() -> dict:
     with open(YAML_USERS, 'r', encoding='utf-8') as file:
         return yaml.safe_load(file)
+    
+def get_categories() -> dict:
+    with open(YAML_CATEGORIES, 'r', encoding='utf-8') as file:
+        return yaml.safe_load(file)['categories']
 
 def create_user(user_id: int, user_first_name: str) -> None:    
     data = get_users()
@@ -61,7 +79,7 @@ def create_user(user_id: int, user_first_name: str) -> None:
             yaml.safe_dump(data, file, allow_unicode=True)
     return
         
-@dp.message(Command('start'))
+@main_router.message(Command('start'))
 async def start_handler(message: types.Message):
     user_id = message.from_user.id
     first_name = message.from_user.first_name
@@ -78,12 +96,12 @@ async def start_handler(message: types.Message):
         reply_markup=reply_keyboard
     )
     
-@dp.message(Command('info'))
+@main_router.message(Command('info'))
 async def info_handler(message: types.Message):
     await message.answer("Я буду твоим персональным помощником по финансам." 
                          " Нажми /start, чтобы ознакомться с моими возможностями")
     
-@dp.message(lambda message: message.text == 'Твоя статистика')
+@main_router.message(lambda message: message.text == 'Твоя статистика')
 async def stats(message: types.Message):
     await message.answer("Твоя статистика пока пуста")
     
@@ -97,23 +115,36 @@ def create_transaction(category: str, amount: float, type: str, description: str
         "description": description
     }
     
-@dp.message(lambda message: message.text == 'Ввести доход')
-async def enter_income(message: types.Message):
-    with open(YAML_USERS, 'r') as file:
-        users = yaml.safe_load(file)
-    curr_category = users['users'][message.from_user.id]['categories']['food']
+# -------------- Enter expense with category recogniser --------------
+@expense_router.message(lambda message: message.text == 'Ввести расход')
+async def enter_expense(message: types.Message, state: FSMContext):
+    await message.answer("Введите расход:")
+    await state.set_state(ExpenseForm.waiting_for_callback)
     
-    transaction = create_transaction(
-        "food",
-        250.0,
-        "income",
-    )
-    curr_category.append(transaction)
+@expense_router.message(ExpenseForm.waiting_for_callback)
+async def process_enter_expense(message: types.Message, state: FSMContext):
+    amount = number_searcher(message.text)
+    noun = noun_searcher(message.text)[0]
     
-    with open(YAML_USERS, 'w') as file:
-        yaml.safe_dump(users, file, allow_unicode=True)
-     
+    categories = get_categories()
+
+    output_category = None
+    for category, data in categories.items():
+        if noun in data.get('keywords', []):
+            output_category = category
+            
+    if not output_category:
+        model = SkClassifier()
+        model.retrain()
+        predict_category, prob = model.predict(noun)
+        await message.answer(f"Я уверен то что это {predict_category} на {prob}")
+        if prob > 0.7:
+            output_category = predict_category
+        
+    await message.answer(f"{amount=}, {output_category=}")
+
     
+
 @dp.message(lambda message: message.text == 'Помощь')
 async def help(message: types.Message):
     await message.answer(
@@ -132,6 +163,9 @@ async def food(message: types.Message):
 # @dp.message()
 # async def unknown_command(message: types.Message):
 #     await message.answer("Такой команды нет")
+
+dp.include_router(main_router)
+dp.include_router(expense_router)
 
 async def main():
     await bot.delete_webhook(drop_pending_updates=True)
