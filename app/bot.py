@@ -1,4 +1,4 @@
-# python3 -m SmartWallet.app.bot
+# python3 -m app.bot
 
 import asyncio
 import datetime
@@ -19,8 +19,8 @@ from aiogram.types import (
 )
 from dotenv import load_dotenv
 
-from ..model.model import SkClassifier
-from ..utils.text_processing import noun_searcher, number_searcher
+from model.model import SkClassifier
+from utils.text_processing import noun_searcher, number_searcher
 
 load_dotenv()
 
@@ -99,6 +99,7 @@ async def start_handler(message: types.Message):
         "Или используй кнопки ниже ⬇️",
         reply_markup=reply_keyboard,
     )
+
 
 @main_router.message(Command("info"))
 async def info_handler(message: types.Message):

@@ -8,8 +8,7 @@ class User:
     user_name: str
     balance: float
     created_at: date = datetime.now()
-    
+
     def __post_init__(self):
         if self.user_id < 0:
             raise ValueError()
-    

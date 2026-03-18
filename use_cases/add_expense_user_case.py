@@ -2,26 +2,38 @@ from datetime import date, datetime
 from uuid import UUID, uuid4
 
 from domain.entities.transaction import Transaction
+from model.basic_classifier import BasicClassifier
+from repository.base_categories_repository import BaseCategoriesRepositry
 from repository.base_transaction_repository import BaseTransactionRepository
+from services.text_processing import TextProcessing
 
 
 class AddExpenseUseCase:
-    def __init__(self, transaction_repository: BaseTransactionRepository):
+    def __init__(
+        self,
+        transaction_repository: BaseTransactionRepository,
+        categories_repository: BaseCategoriesRepositry,
+        classifier: BasicClassifier,
+    ):
         self.transaction_repositry = transaction_repository
-        
-    async def execute(self, transaction_id: UUID, amount: float) -> Transaction:
-        tranaction = self.transaction_repositry.find_transaction_by_id(transaction_id)
-        
-        if tranaction:
-            return tranaction
-        
+        self.categories_repository = categories_repository
+        self.text_processing = TextProcessing()
+        self.model = classifier
+
+    async def execute(self, user_id: int, text: str) -> Transaction:
+        amount = self.text_processing.number_searcher(text)
+        main_lemma = self.text_processing.noun_searcher(text)[0]
+
+        output_category = self.categories_repository.keyword_search(main_lemma)
+
+        if not output_category:
+            output_category, prob = self.model.predict(main_lemma)
+
         new_transaction = Transaction(
-            transaction_id,
-            datetime.now(),
-            category=None,
-            amount = amount
+            category=output_category,
+            amount=amount,
         )
-        
-        self.transaction_repositry.save_transaction(new_transaction)
-        
+
+        await self.transaction_repositry.save_transaction(user_id, new_transaction)
+
         return new_transaction

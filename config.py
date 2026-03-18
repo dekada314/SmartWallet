@@ -1,0 +1,6 @@
+YAML_CATEGORIES = "knowledge_base/categories.yml"
+SQLITE_USERS = "knowledge_base/users_db.sqlite3"
+SQLITE_TRANSACTIONS = "knowledge_base/transactions_db.sqlite3"
+DATASET_PATH = "model/dataset.csv"
+MODEL_PATH = "model/dumps/model.joblib"
+VECTORIZER_PATH = "model/dumps/vectorizer.joblib"

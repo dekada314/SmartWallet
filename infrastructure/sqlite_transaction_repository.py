@@ -8,45 +8,52 @@ class SQLiteTransactionRepository(BaseTransactionRepository):
     def __init__(self, transaction_db_path: str):
         self.conn = sqlite3.connect(transaction_db_path)
         self.conn.row_factory = sqlite3.Row
-        
+
         self._init_db()
-    
+
     def _init_db(self):
         self.conn.execute("""
             CREATE TABLE IF NOT EXISTS transactions(
-                    transaction_id INTEGER PRIMARY KEY,
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    user_id INTEGER,
+                    transaction_id TEXT,
                     category TEXT NOT NULL,
-                    amount REAL NOT NULL,
-                    created_ad DATE,
-                    description TEXT
+                    amount REAL,
+                    created_at DATE
             ) 
         """)
-        
+
         self.conn.commit()
-    
-    
-    async def save_transaction(self, transaction: Transaction) -> None:
-        self.cursor.execute(
-            "INSERT OR REPLACE INTO transactions(?, ?, ?)",
-            (transaction.transaction_id, transaction.category, transaction.balance)
+
+    async def save_transaction(self, user_id: int, transaction: Transaction) -> None:
+        self.conn.execute(
+            "INSERT OR REPLACE INTO transactions(user_id, transaction_id, category, amount, created_at) VALUES(?, ?, ?, ?, ?)",
+            (user_id, transaction.transaction_id, transaction.category, transaction.amount, transaction.created_at),
         )
-        
+
         self.conn.commit()
-        
-    async def delete_transaction_by_id(self, transaction_id: int) -> None:
-        self.cursor.execute(
-            "DELETE FROM transactions WHERE transaction_id = ?",(transaction_id,)
-            )
-        
-        self.conn.commit()
-        
-    async def get_transaction_by_transaction_id(self, transaction_id: int) -> Transaction | None:
-        self.cursor.execute(
-            "SELECT * FROM transactions WHERE transaction_id = ?",
-            (transaction_id)
+
+    async def delete_by_transaction_id(self, transaction_id: int) -> None:
+        self.conn.execute(
+            "DELETE FROM transactions WHERE transaction_id = ?", (transaction_id,)
         )
-        row = self.cursor.fetchone()
+
+        self.conn.commit()
+
+    async def get_transaction_by_transaction_id(
+        self, transaction_id: int
+    ) -> Transaction | None:
+        cursor = self.conn.cursor()
+        cursor.execute(
+            "SELECT * FROM transactions WHERE transaction_id = ?", (transaction_id)
+        )
+        row = cursor.fetchone()
         if row:
-            return Transaction(transaction_id=row['transaction_id'], transaction_name=row['transaction_name'], balance=row['balance'])
+            return Transaction(
+                transaction_id=row["transaction_id"],
+                amount=row["amount"],
+                category=row["category"],
+                created_at=row["created_at"]
+            )
         self.conn.commit()
         return None

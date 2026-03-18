@@ -9,28 +9,24 @@ class BaseHandler:
     def __init__(self, user_registry_us: UserRegisterUseCase):
         self.user_registry_us = user_registry_us
         self.router = Router()
-        self._handle_registry()
 
-    def _handle_registry(self):
-
+    def register(self):
         @self.router.message(Command("start"))
         async def handle_start_command(message: types.Message):
             user_id = message.from_user.id
             user_name = message.from_user.first_name
-            
-            user = self.user_registry_us.execute(user_id, user_name)
+
+            user = await self.user_registry_us.execute(user_id, user_name)
             if user:
                 await message.answer(
                     f"Привет, {user_name}! 👋 Я твой личный калькулятор расходов и секретный хранитель денег\n"
                     "Давай посмотрим, куда сегодня улетят твои рубли 💸… или хотя бы научимся это отслеживать!\n"
                     "Если хочешь ознакомиться с моими командами, то нажимай на /info",
-                    reply_markup=Keyaboards.get_all_func_buttons()
+                    reply_markup=Keyaboards.get_all_func_buttons(),
                 )
             else:
-                await message.ansswer(
-                    ""
-                )
-        
+                await message.answer("")
+
         @self.router.message(Command("info"))
         async def handle_info_command(message: types.Message):
             await message.answer("Что-то блаблаалаб")
