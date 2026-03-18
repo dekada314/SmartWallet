@@ -26,7 +26,9 @@ class ExpenseHandler:
         async def handle_expense_expression(message: types.Message, state: FSMContext):
             # допилить бд транзакций, разобраться с праймари кеями, пересмотреть логику use case, сделать сервисы по анализу текста
             try:
-                transaction = await self.add_expense_us.execute(message.from_user.id, message.text)
+                transaction = await self.add_expense_us.execute(
+                    message.from_user.id, message.text
+                )
                 await message.answer(f"""
                         Ваша транзакция:
                         {transaction.category}\n

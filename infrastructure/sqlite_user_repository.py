@@ -38,7 +38,7 @@ class SQLiteUserRepository(BaseUserRepository):
     async def get_user_by_user_id(self, user_id: int) -> User | None:
         cursor = self.conn.cursor()
         cursor.execute("SELECT * FROM users WHERE user_id = ?", (user_id,))
-        
+
         row = cursor.fetchone()
         if row:
             return User(

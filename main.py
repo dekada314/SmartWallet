@@ -21,12 +21,14 @@ load_dotenv()
 
 
 async def main():
-    user_db= SQLiteUserRepository(config.SQLITE_USERS)
-    transaction_db= SQLiteTransactionRepository(config.SQLITE_TRANSACTIONS) 
+    user_db = SQLiteUserRepository(config.SQLITE_USERS)
+    transaction_db = SQLiteTransactionRepository(config.SQLITE_TRANSACTIONS)
     categories_kb = YamlCategoriesRepository(config.YAML_CATEGORIES)
-    
-    ml_model = SkClassifier(config.DATASET_PATH, config.VECTORIZER_PATH, config.MODEL_PATH)
-    
+
+    ml_model = SkClassifier(
+        config.DATASET_PATH, config.VECTORIZER_PATH, config.MODEL_PATH
+    )
+
     add_expense_us = AddExpenseUseCase(transaction_db, categories_kb, ml_model)
     register_us = UserRegisterUseCase(user_db)
     advice_us = GiveAdviceUseCase()
@@ -38,13 +40,13 @@ async def main():
 
     bot = Bot(os.getenv("TOKEN"))
     dp = Dispatcher()
-    
+
     dp.include_router(base_handler.router)
     dp.include_router(expense_handler.router)
-    
+
     await bot.delete_webhook(drop_pending_updates=True)
     await dp.start_polling(bot)
-    
-    
+
+
 if __name__ == "__main__":
     asyncio.run(main())

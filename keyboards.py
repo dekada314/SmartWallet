@@ -16,8 +16,6 @@ class Keyaboards:
                     KeyboardButton(text="Ввести расход"),
                     KeyboardButton(text="Ввести доход"),
                 ],
-                [KeyboardButton(text="Помощь")],
-                [KeyboardButton(text="еда")],
             ],
             resize_keyboard=True,
         )

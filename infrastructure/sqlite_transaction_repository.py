@@ -28,7 +28,13 @@ class SQLiteTransactionRepository(BaseTransactionRepository):
     async def save_transaction(self, user_id: int, transaction: Transaction) -> None:
         self.conn.execute(
             "INSERT OR REPLACE INTO transactions(user_id, transaction_id, category, amount, created_at) VALUES(?, ?, ?, ?, ?)",
-            (user_id, transaction.transaction_id, transaction.category, transaction.amount, transaction.created_at),
+            (
+                user_id,
+                transaction.transaction_id,
+                transaction.category,
+                transaction.amount,
+                transaction.created_at,
+            ),
         )
 
         self.conn.commit()
@@ -53,7 +59,7 @@ class SQLiteTransactionRepository(BaseTransactionRepository):
                 transaction_id=row["transaction_id"],
                 amount=row["amount"],
                 category=row["category"],
-                created_at=row["created_at"]
+                created_at=row["created_at"],
             )
         self.conn.commit()
         return None

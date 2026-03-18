@@ -16,15 +16,15 @@ class YamlCategoriesRepository(BaseCategoriesRepositry):
         output_category = None
         categories = self.get_all_categories()
         for category, data in categories.items():
-            if keyword in data['keywords']:
+            if keyword in data["keywords"]:
                 output_category = category
 
         return output_category
 
     def save_category(self, category_name: str) -> None:
         print("...")
-        
+
 
 if __name__ == "__main__":
     categor = YamlCategoriesRepository(config.YAML_CATEGORIES)
-    print(categor.keyword_search('трамвай'))
+    print(categor.keyword_search("трамвай"))

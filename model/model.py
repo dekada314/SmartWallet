@@ -13,7 +13,7 @@ class SkClassifier(BasicClassifier):
         self.model = joblib.load(model_path)
 
     def predict(self, word: str) -> tuple[str, float]:
-        X = self.vectorizer.transform(['word'])  # noqa
+        X = self.vectorizer.transform(["word"])  # noqa
         category = self.model.predict(X)[0]
         confidence = self.model.predict_proba(X).max()
         return category, confidence
