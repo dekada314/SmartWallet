@@ -4,7 +4,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.utils.markdown import hbold, hcode, hitalic, hlink
 
-from keyboards import Keyaboards
+from keyboards import Keyboards
 from use_cases.add_expense_user_case import AddExpenseUseCase
 
 

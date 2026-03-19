@@ -1,7 +1,7 @@
 from aiogram import Router, types
 from aiogram.filters import Command
 
-from keyboards import Keyaboards
+from keyboards import Keyboards
 from use_cases.user_register_use_case import UserRegisterUseCase
 
 
@@ -22,7 +22,7 @@ class BaseHandler:
                     f"Привет, {user_name}! 👋 Я твой личный калькулятор расходов и секретный хранитель денег\n"
                     "Давай посмотрим, куда сегодня улетят твои рубли 💸… или хотя бы научимся это отслеживать!\n"
                     "Если хочешь ознакомиться с моими командами, то нажимай на /info",
-                    reply_markup=Keyaboards.get_all_func_buttons(),
+                    reply_markup=Keyboards.get_all_func_buttons(),
                 )
             else:
                 await message.answer("")

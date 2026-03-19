@@ -7,7 +7,7 @@ class TextProcessing:
     def __init__(self):
         self.morph = pymorphy3.MorphAnalyzer()
 
-    def noun_searcher(self, text: str) -> list[str]:
+    def main_noun_searcher(self, text: str) -> list[str]:
         """
         Получает на вход строку, выдает список только существительных в их нормальной форме
         """
@@ -20,8 +20,5 @@ class TextProcessing:
         return output
 
     def number_searcher(self, text: str) -> float:
-        """
-        Ищет число в строке и возвращает его
-        """
         number = re.search(r"\d+", text)
         return float(number.group())

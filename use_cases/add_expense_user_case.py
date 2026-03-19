@@ -22,7 +22,7 @@ class AddExpenseUseCase:
 
     async def execute(self, user_id: int, text: str) -> Transaction:
         amount = self.text_processing.number_searcher(text)
-        main_lemma = self.text_processing.noun_searcher(text)[0]
+        main_lemma = self.text_processing.main_noun_searcher(text)[0]
 
         output_category = self.categories_repository.keyword_search(main_lemma)
 
