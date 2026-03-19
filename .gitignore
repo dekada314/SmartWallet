@@ -10,5 +10,14 @@ wheels/
 .venv
 .env
 
+# Ruff files
+.ruff_cache
+
+# Databases
+advices.yml
+categories.yml
+transactions_db.sqlite3
+users_db.sqlite3
+
 # third-party test files
 test.py

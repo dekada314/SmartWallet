@@ -2,6 +2,7 @@ from aiogram import Router, types
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
+from aiogram.utils.markdown import hbold, hcode, hitalic, hlink
 
 from keyboards import Keyaboards
 from use_cases.add_expense_user_case import AddExpenseUseCase
@@ -29,12 +30,13 @@ class ExpenseHandler:
                 transaction = await self.add_expense_us.execute(
                     message.from_user.id, message.text
                 )
-                await message.answer(f"""
-                        Ваша транзакция:
-                        {transaction.category}\n
-                        {transaction.amount}\n
-                        {transaction.created_at}\n
-                """)
+                await message.answer(
+                    f"🏦 <b>Ваша транзакция</b> \n\n"
+                    f"<b>Категория:</b> {transaction.category}\n"
+                    f"<b>Сумма:</b> {transaction.amount}\n"
+                    f"<b>Дата и время:</b> {transaction.created_at.strftime('%d.%m.%Y - %H:%M:%S')}\n",
+                    parse_mode="HTML",
+                )
 
             finally:
                 await state.clear()

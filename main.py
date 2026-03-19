@@ -22,7 +22,9 @@ load_dotenv()
 
 async def main():
     user_db = SQLiteUserRepository(config.SQLITE_USERS)
+    await user_db.init_db()
     transaction_db = SQLiteTransactionRepository(config.SQLITE_TRANSACTIONS)
+    await transaction_db.init_db()
     categories_kb = YamlCategoriesRepository(config.YAML_CATEGORIES)
 
     ml_model = SkClassifier(
