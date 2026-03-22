@@ -1,15 +1,16 @@
 from aiogram import F, Router, types
 from aiogram.fsm.context import FSMContext
-from aiogram.types import CallbackQuery
 from aiogram.fsm.state import State, StatesGroup
+from aiogram.types import CallbackQuery
 
 from keyboards import Keyboards
-
-from use_cases.save_goal_use_case import SaveGoalUseCase
 from use_cases.display_user_goals_use_case import DisplayUserGoals
+from use_cases.save_goal_use_case import SaveGoalUseCase
+
 
 class GoalForm(StatesGroup):
     waiting_for_goal = State()
+    waiting_for_taget = State()
 
 class GoalHandler:
     def __init__(self, save_goal_us: SaveGoalUseCase, display_goals_us: DisplayUserGoals):
@@ -29,10 +30,21 @@ class GoalHandler:
             await state.set_state(GoalForm.waiting_for_goal)
             
         @self.router.message(GoalForm.waiting_for_goal)
-        async def handle_user_goal(message: types.Message, state: FSMContext):
-            await self.save_goal_us.execute(message.from_user.id, message.text)
-            await state.clear()
+        async def handle_goal_text(message: types.Message, state: FSMContext):
+            await state.update_data(goal_description=message.text)
+
+            await message.answer("Введите сколько денег планируете копить:")
+            await state.set_state(GoalForm.waiting_for_taget)
             
+        @self.router.message(GoalForm.waiting_for_taget)
+        async def handle_goal_target(message: types.Message, state: FSMContext):
+            data = await state.get_data()
+            goal_text = data.get("goal_description")
+            await state.clear()
+            if not goal_text:
+                await message.answer("анлак")
+            await self.save_goal_us.execute(message.from_user.id, float(message.text), 0, goal_text)
+        
         @self.router.callback_query(F.data == "del_goal")
         async def handle_del_goal(callback: CallbackQuery):
             await callback.answer()
@@ -45,4 +57,11 @@ class GoalHandler:
         async def handle_set_up_goals(callback: CallbackQuery):
             await callback.answer()
             data = await self.display_goals_us.execute(callback.from_user.id)
-            await callback.message.answer(data[0])
+            output = ""
+            for index, goal in enumerate(data):
+                output += f"<b>{index + 1}. {goal[0]}, изначальная цель {goal[1]}\n</b>"
+                
+            await callback.message.answer(
+                f"Вот список ваших целей:\n{output}",
+                parse_mode="HTML"
+                )

@@ -13,17 +13,19 @@ class SqliteGoalsRepository(BaseGoalsRepository):
                 CREATE TABLE IF NOT EXISTS goals(
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     user_id INTEGER,
+                    target FLOAT,
+                    curr_bill FLOAT,
                     text TEXT
                 )
             """)
 
             await db.commit()
             
-    async def save_goal(self, user_id: int, text: str):
+    async def save_goal(self, user_id: int, target: float, curr_bill: float, text: str):
         async with aiosqlite.connect(self.db_path) as db:
             await db.execute(
-                "INSERT INTO goals(user_id, text) VALUES(?, ?)",
-                (user_id, text)
+                "INSERT INTO goals(user_id, target, curr_bill, text) VALUES(?, ?, ?, ?)",
+                (user_id, target, curr_bill, text)
             )
             await db.commit()
             
@@ -32,4 +34,4 @@ class SqliteGoalsRepository(BaseGoalsRepository):
             db.row_factory = aiosqlite.Row
             cur = await db.execute("SELECT * FROM goals WHERE user_id = ?", (user_id,))
             data = await cur.fetchall()
-            return [row["text"] for row in data]
+            return [[row["text"], row["target"]] for row in data]
