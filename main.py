@@ -19,6 +19,7 @@ from use_cases.add_expense_user_case import AddExpenseUseCase
 from use_cases.display_user_goals_use_case import DisplayUserGoals
 from use_cases.give_advice_use_case import GiveAdviceUseCase
 from use_cases.save_goal_use_case import SaveGoalUseCase
+from use_cases.update_goal_use_case import UpdateGoalUseCase
 from use_cases.user_register_use_case import UserRegisterUseCase
 
 load_dotenv()
@@ -42,12 +43,13 @@ async def main():
     advice_us = GiveAdviceUseCase()
     save_goal_us = SaveGoalUseCase(goal_db)
     display_goals_us = DisplayUserGoals(goal_db)
+    update_goal_us = UpdateGoalUseCase(goal_db)
 
     base_handler = BaseHandler(register_us)
     base_handler.register()
     expense_handler = ExpenseHandler(add_expense_us)
     expense_handler.register()
-    goal_handler = GoalHandler(save_goal_us, display_goals_us)
+    goal_handler = GoalHandler(save_goal_us, display_goals_us, update_goal_us)
     goal_handler.register()
 
     bot = Bot(os.getenv("TOKEN"))
