@@ -20,9 +20,15 @@ class AddExpenseUseCase:
         self.text_processing = TextProcessing()
         self.model = classifier
 
-    async def execute(self, user_id: int, text: str) -> Transaction:
+    async def execute(self, user_id: int, text: str) -> Transaction | None:
+        if not user_id or not text:
+            raise ValueError
+        
         amount = self.text_processing.number_searcher(text)
         main_lemma = self.text_processing.main_noun_searcher(text)[0]
+        
+        if not amount or not main_lemma:
+            raise ValueError 
 
         output_category = self.categories_repository.keyword_search(main_lemma)
 
