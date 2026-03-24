@@ -63,3 +63,6 @@ class SQLiteTransactionRepository(BaseTransactionRepository):
                 )
             self.conn.commit()
             return None
+
+    async def get_user_transactions_count(self):
+        pass

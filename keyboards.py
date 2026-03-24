@@ -38,8 +38,7 @@ class Keyboards:
                 [
                     InlineKeyboardButton(
                         text="Добавить цель", callback_data="save_goal"
-                    ),
-                    InlineKeyboardButton(text="Удалить цель", callback_data="del_goal"),
+                    )
                 ],
                 [
                     InlineKeyboardButton(
@@ -59,6 +58,21 @@ class Keyboards:
                 [
                     InlineKeyboardButton(
                         text="Добавить к цели", callback_data=f"update_goal_{goal_id}"
+                    )
+                ]
+            ]
+        )
+        
+    @staticmethod
+    def get_setup_goal_button(goal_id: str) -> InlineKeyboardMarkup:
+        return InlineKeyboardMarkup(
+            inline_keyboard=[
+                [
+                    InlineKeyboardButton(
+                        text="Удалить цель", callback_data=f"del_goal_{goal_id}"
+                    ),
+                    InlineKeyboardButton(
+                        text="Поменять описание цели", callback_data=f"update_desc_{goal_id}"
                     )
                 ]
             ]

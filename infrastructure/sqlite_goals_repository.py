@@ -52,15 +52,16 @@ class SqliteGoalsRepository(BaseGoalsRepository):
             db.row_factory = aiosqlite.Row
             cur = await db.execute("SELECT * FROM goals WHERE user_id = ?", (user_id,))
             data = await cur.fetchall()
-            return [[row["text"], row["target"], row["curr_bill"]] for row in data]
+            return [[row["text"], row["target"], row["curr_bill"], row["user_goal_id"]] for row in data]
 
     async def get_goal_attrs(self, user_id: int, user_goal_id: int):
         async with aiosqlite.connect(self.db_path) as db:
+            db.row_factory = aiosqlite.Row
             cursor = await db.execute(
                 "SELECT * FROM goals WHERE user_id = ? AND user_goal_id = ?",
                 (user_id, user_goal_id),
             )
-            row = cursor.fetchone()
+            row = await cursor.fetchone()
             goal = Goal(
                 row["user_id"],
                 row["user_goal_id"],
@@ -73,16 +74,23 @@ class SqliteGoalsRepository(BaseGoalsRepository):
     async def update_goal(self, goal: Goal):
         async with aiosqlite.connect(self.db_path) as db:
             await db.execute(
-                "UPDATE goals SET curr_bill = curr_bill + ? WHERE user_id = ? AND user_goal_id = ?",
+                "UPDATE goals SET curr_bill = ? WHERE user_id = ? AND user_goal_id = ?",
                 (goal.curr_bill, goal.user_id, goal.user_goal_id),
             )
             await db.commit()
 
-    async def delete_goal(self, user_id, goal_id):
+    async def delete_goal(self, goal: Goal):
         async with aiosqlite.connect(self.db_path) as db:
             await db.execute(
                 "DELETE FROM goals WHERE user_id = ? AND user_goal_id = ?",
-                (user_id, goal_id),
+                (goal.user_id, goal.user_goal_id),
             )
 
-            db.commit()
+            await db.commit()
+    async def change_goal_text(self, goal: Goal):
+        async with aiosqlite.connect(self.db_path) as db:
+            await db.execute(
+                "UPDATE goals SET text = ? WHERE user_id = ? AND user_goal_id = ?",
+                (goal.text, goal.user_id, goal.user_goal_id)
+            )
+            await db.commit()

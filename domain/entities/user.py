@@ -2,13 +2,22 @@ from dataclasses import dataclass
 from datetime import date, datetime
 
 
-@dataclass(slots=True, frozen=True)
+@dataclass(slots=True)
 class User:
     user_id: str
     user_name: str
     balance: float
-    created_at: date = datetime.now()
+    created_at: date
+    last_transaction_date: date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     def __post_init__(self):
-        if self.user_id < 0:
-            raise ValueError()
+        if self.user_id < 0 or self.balance < 0:
+            raise ValueError
+
+    def change_user_name(self, new_name: str):
+        if isinstance(new_name, str):
+            self.user_name = new_name
+
+    def add_amount(self, value: int | float):
+        if isinstance(value, (int, float)):
+            self.balance += value

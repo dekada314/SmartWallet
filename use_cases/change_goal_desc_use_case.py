@@ -4,7 +4,7 @@ from domain.entities.goal import Goal
 from repository.base_goals_repository import BaseGoalsRepository
 
 
-class UpdateGoalUseCase:
+class ChangeGoalDescUseCase:
     def __init__(self, goal_repository: BaseGoalsRepository):
         self.goal_repository = goal_repository
 
@@ -13,15 +13,9 @@ class UpdateGoalUseCase:
             message.from_user.id, goal_id
         )
         try:
-            new_bill = float(message.text)
-            is_goal_achieved = goal.add_amount(new_bill)
-            if is_goal_achieved is None:
-                await self.goal_repository.update_goal(goal)
-                return goal
-        
-            await self.goal_repository.delete_goal(goal)
-            return is_goal_achieved
-
+            goal.text = message.text
+            await self.goal_repository.change_goal_text(goal)
+            return goal
         except ValueError:
-            print("Ввод должен быть неотрицательным")
+            print("бе")
             

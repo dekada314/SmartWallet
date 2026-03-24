@@ -3,7 +3,7 @@ from datetime import date, datetime
 from uuid import UUID, uuid4
 
 
-@dataclass(slots=True, frozen=True)
+@dataclass(slots=True)
 class Transaction:
     category: str
     amount: float
@@ -12,4 +12,7 @@ class Transaction:
 
     def __post_init__(self):
         if not isinstance(self.category, str):
+            raise ValueError
+
+        if self.amount < 0:
             raise ValueError

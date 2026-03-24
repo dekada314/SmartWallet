@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from domain.entities.user import User
 from repository.base_user_repository import BaseUserRepository
 
@@ -9,9 +11,14 @@ class UserRegisterUseCase:
     async def execute(self, user_id: int, user_name: str) -> User:
         user = await self.user_repository.get_user_by_user_id(user_id)
         if user:
-            return user
+            return None
 
-        new_user = User(user_id, user_name, balance=0)
+        new_user = User(
+            user_id,
+            user_name,
+            created_at=datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            balance=0,
+        )
 
         await self.user_repository.save_user(new_user)
 

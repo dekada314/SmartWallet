@@ -16,6 +16,8 @@ from infrastructure.yaml_categories_repository import YamlCategoriesRepository
 from model.model import SkClassifier
 from services.text_processing import TextProcessing
 from use_cases.add_expense_user_case import AddExpenseUseCase
+from use_cases.change_goal_desc_use_case import ChangeGoalDescUseCase
+from use_cases.delete_goal_use_case import DeleteGoalUseCase
 from use_cases.display_user_goals_use_case import DisplayUserGoals
 from use_cases.give_advice_use_case import GiveAdviceUseCase
 from use_cases.save_goal_use_case import SaveGoalUseCase
@@ -38,9 +40,11 @@ async def main():
         config.DATASET_PATH, config.VECTORIZER_PATH, config.MODEL_PATH
     )
 
-    add_expense_us = AddExpenseUseCase(transaction_db, categories_kb, ml_model)
+    add_expense_us = AddExpenseUseCase(transaction_db, categories_kb, user_db, ml_model)
     register_us = UserRegisterUseCase(user_db)
     advice_us = GiveAdviceUseCase()
+    change_goal_us = ChangeGoalDescUseCase(goal_db)
+    delete_goal_us = DeleteGoalUseCase(goal_db)
     save_goal_us = SaveGoalUseCase(goal_db)
     display_goals_us = DisplayUserGoals(goal_db)
     update_goal_us = UpdateGoalUseCase(goal_db)
@@ -49,7 +53,7 @@ async def main():
     base_handler.register()
     expense_handler = ExpenseHandler(add_expense_us)
     expense_handler.register()
-    goal_handler = GoalHandler(save_goal_us, display_goals_us, update_goal_us)
+    goal_handler = GoalHandler(save_goal_us, display_goals_us, update_goal_us, delete_goal_us, change_goal_us)
     goal_handler.register()
 
     bot = Bot(os.getenv("TOKEN"))

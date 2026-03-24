@@ -5,6 +5,7 @@ from domain.entities.transaction import Transaction
 from model.basic_classifier import BasicClassifier
 from repository.base_categories_repository import BaseCategoriesRepositry
 from repository.base_transaction_repository import BaseTransactionRepository
+from repository.base_user_repository import BaseUserRepository
 from services.text_processing import TextProcessing
 
 
@@ -13,10 +14,12 @@ class AddExpenseUseCase:
         self,
         transaction_repository: BaseTransactionRepository,
         categories_repository: BaseCategoriesRepositry,
+        user_repository: BaseUserRepository,
         classifier: BasicClassifier,
     ):
         self.transaction_repositry = transaction_repository
         self.categories_repository = categories_repository
+        self.user_repository = user_repository
         self.text_processing = TextProcessing()
         self.model = classifier
 
@@ -41,5 +44,6 @@ class AddExpenseUseCase:
         )
 
         await self.transaction_repositry.save_transaction(user_id, new_transaction)
+        await self.user_repository.update_last_action(user_id)
 
         return new_transaction

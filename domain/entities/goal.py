@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 
 
-@dataclass(slots=True, frozen=True)
+@dataclass(slots=True)
 class Goal:
     user_id: int
     user_goal_id: int
@@ -17,7 +17,9 @@ class Goal:
 
     def add_amount(self, value):
         self.curr_bill += value
-        return self.is_achieved()
+        if self.is_achieved():
+            return self.curr_bill - self.target
+        return None
 
     def is_achieved(self):
         return self.curr_bill >= self.target

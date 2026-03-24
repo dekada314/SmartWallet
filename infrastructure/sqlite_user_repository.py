@@ -1,3 +1,5 @@
+from datetime import datetime
+
 import aiosqlite
 
 from domain.entities.user import User
@@ -14,7 +16,10 @@ class SQLiteUserRepository(BaseUserRepository):
                 CREATE TABLE IF NOT EXISTS users(
                         user_id INTEGER PRIMARY KEY,
                         user_name TEXT NOT NULL,
-                        balance REAL NOT NULL
+                        balance REAL NOT NULL,
+                        created_at DATE,
+                        last_transaction_date DATE
+                         
                 ) 
             """)
 
@@ -23,8 +28,14 @@ class SQLiteUserRepository(BaseUserRepository):
     async def save_user(self, user: User) -> None:
         async with aiosqlite.connect(self.db_path) as db:
             await db.execute(
-                "INSERT OR REPLACE INTO users(user_id, user_name, balance) VALUES (?, ?, ?)",
-                (user.user_id, user.user_name, user.balance),
+                "INSERT OR REPLACE INTO users(user_id, user_name, balance, created_at, last_transaction_date) VALUES (?, ?, ?, ?, ?)",
+                (
+                    user.user_id,
+                    user.user_name,
+                    user.balance,
+                    user.created_at,
+                    user.last_transaction_date,
+                ),
             )
 
             await db.commit()
@@ -48,5 +59,16 @@ class SQLiteUserRepository(BaseUserRepository):
                     user_id=row["user_id"],
                     user_name=row["user_name"],
                     balance=row["balance"],
+                    created_at=row["created_at"],
+                    last_transaction_date=row["last_transaction_date"],
                 )
             return None
+
+    async def update_last_action(self, user_id: int):
+        async with aiosqlite.connect(self.db_path) as db:
+            await db.execute(
+                "UPDATE users SET last_transaction_date = ? WHERE user_id = ?",
+                (datetime.now().strftime("%Y-%m-%d %H:%M:%S"), user_id),
+            )
+
+            await db.commit()

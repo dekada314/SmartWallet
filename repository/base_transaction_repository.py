@@ -6,6 +6,9 @@ from domain.entities.transaction import Transaction
 class BaseTransactionRepository(ABC):
     @abstractmethod
     async def save_transaction() -> None: ...
+    
+    @abstractmethod
+    async def get_user_transactions_count() -> int: ...
 
     # @abstractmethod
     # async def delete_transaction() -> None: ...
