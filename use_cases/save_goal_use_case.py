@@ -1,3 +1,6 @@
+from aiogram.types import Message
+
+from domain.entities.goal import Goal
 from domain.entities.user import User
 from repository.base_goals_repository import BaseGoalsRepository
 
@@ -6,7 +9,11 @@ class SaveGoalUseCase:
     def __init__(self, goal_repository: BaseGoalsRepository):
         self.goal_repository = goal_repository
 
-    async def execute(
-        self, user_id: int, target: float, curr_bill: float, text: str
-    ) -> User:
-        await self.goal_repository.save_goal(user_id, target, curr_bill, text)
+    async def execute(self, message: Message, goal_text: str) -> User:
+        user_id = message.from_user.id
+
+        goal_id = await self.goal_repository.get_last_id(user_id) + 1
+
+        new_goal = Goal(user_id, goal_id, float(message.text), 0, goal_text)
+
+        await self.goal_repository.save_goal(new_goal)

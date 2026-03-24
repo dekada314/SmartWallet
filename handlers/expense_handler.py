@@ -26,8 +26,8 @@ class ExpenseHandler:
                 "<i>купил кофе за 7</i>\n"
                 "<i>курсы 300 рублей</i>\n"
                 "<i>15 рублей за продукты </i>\n",
-                parse_mode="HTML"
-                )
+                parse_mode="HTML",
+            )
             await state.set_state(ExpenseForm.waiting_for_callback)
 
         @self.router.message(ExpenseForm.waiting_for_callback)

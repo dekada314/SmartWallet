@@ -52,9 +52,7 @@ class GoalHandler:
             data = await state.get_data()
             goal_text = data.get("goal_description")
             await state.clear()
-            await self.save_goal_us.execute(
-                message.from_user.id, float(message.text), 0, goal_text
-            )
+            await self.save_goal_us.execute(message, goal_text)
 
         @self.router.callback_query(F.data == "del_goal")
         async def handle_del_goal(callback: CallbackQuery):
@@ -90,7 +88,7 @@ class GoalHandler:
             await callback.answer()
             user_goal_num = callback.data.split("update_goal_")[1]
             await callback.message.answer(user_goal_num)
-            await state.update_data(goal_id = user_goal_num)
+            await state.update_data(goal_id=user_goal_num)
             await callback.message.answer("Введите сколько хотите внести в цель")
             await state.set_state(GoalForm.waiting_for_update)
 
@@ -98,8 +96,6 @@ class GoalHandler:
         async def handle_update_goal(message: types.Message, state: FSMContext):
             data = await state.get_data()
             goal_id = data.get("goal_id")
-            goal_callback = await self.update_goal_us.execute(user_id=message.from_user.id, goal_id=goal_id,curr_bill=float(message.text))
+            goal_callback = await self.update_goal_us.execute(message, goal_id)
             # if not goal_callback:
             #     await message.answer("Поздравляю! Вы выполнили свою цель!!!")
-                
-            

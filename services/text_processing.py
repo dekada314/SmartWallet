@@ -8,9 +8,6 @@ class TextProcessing:
         self.morph = pymorphy3.MorphAnalyzer()
 
     def main_noun_searcher(self, text: str) -> list[str]:
-        """
-        Получает на вход строку, выдает список только существительных в их нормальной форме
-        """
         output = []
         for word in text.split():
             parsed_word = self.morph.parse(word)[0]
