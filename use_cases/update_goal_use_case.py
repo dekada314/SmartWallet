@@ -18,10 +18,9 @@ class UpdateGoalUseCase:
             if is_goal_achieved is None:
                 await self.goal_repository.update_goal(goal)
                 return goal
-        
+
             await self.goal_repository.delete_goal(goal)
             return is_goal_achieved
 
         except ValueError:
             print("Ввод должен быть неотрицательным")
-            

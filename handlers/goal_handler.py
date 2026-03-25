@@ -3,11 +3,12 @@ from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import CallbackQuery
 
-from keyboards import Keyboards
 from domain.entities.goal import Goal
+from keyboards import Keyboards
 from use_cases.change_goal_desc_use_case import ChangeGoalDescUseCase
 from use_cases.delete_goal_use_case import DeleteGoalUseCase
 from use_cases.display_user_goals_use_case import DisplayUserGoals
+from use_cases.exceeding_the_limit_use_case import ExceedingTheLimitUseCase
 from use_cases.save_goal_use_case import SaveGoalUseCase
 from use_cases.update_goal_use_case import UpdateGoalUseCase
 
@@ -26,13 +27,15 @@ class GoalHandler:
         display_goals_us: DisplayUserGoals,
         update_goal_us: UpdateGoalUseCase,
         delete_goal_us: DeleteGoalUseCase,
-        change_goal_us: ChangeGoalDescUseCase
+        change_goal_us: ChangeGoalDescUseCase,
+        exceeding_the_limits_us: ExceedingTheLimitUseCase,
     ):
         self.save_goal_us = save_goal_us
         self.display_goals_us = display_goals_us
         self.update_goal_us = update_goal_us
         self.delete_goal_us = delete_goal_us
         self.change_goal_us = change_goal_us
+        self.exceeding_the_limits_us = exceeding_the_limits_us
         self.router = Router()
 
     def register(self):
@@ -45,8 +48,13 @@ class GoalHandler:
         @self.router.callback_query(F.data == "save_goal")
         async def handle_save_goal(callback: CallbackQuery, state: FSMContext):
             await callback.answer()
-            await callback.message.answer("Напишите описание вашей цели:")
-            await state.set_state(GoalForm.waiting_for_goal)
+            if await self.exceeding_the_limits_us.execute(callback):
+                await callback.message.answer("Напишите описание вашей цели:")
+                await state.set_state(GoalForm.waiting_for_goal)
+            else:
+                await callback.message.answer(
+                    "У вас уже целых 5 целей, предлагаю пока что сфокусироваться на уже существующих"
+                )
 
         @self.router.message(GoalForm.waiting_for_goal)
         async def handle_goal_text(message: types.Message, state: FSMContext):
@@ -82,7 +90,7 @@ class GoalHandler:
                     parse_mode="HTML",
                     reply_markup=Keyboards.get_setup_goal_button(str(goal[3])),
                 )
-        
+
         @self.router.callback_query(F.data.startswith("del_goal_"))
         async def handle_delete_goal(callback: CallbackQuery, state: FSMContext):
             await callback.answer()
@@ -93,15 +101,15 @@ class GoalHandler:
 
             if goal:
                 await callback.message.answer("Цель успешно удалена")
-                
+
         @self.router.callback_query(F.data.startswith("update_desc_"))
         async def handle_change_desc(callback: CallbackQuery, state: FSMContext):
             await callback.answer()
             user_goal_id = int(callback.data.split("update_desc_")[1])
-            await state.update_data(user_goal_id = user_goal_id)
+            await state.update_data(user_goal_id=user_goal_id)
             await callback.message.answer("Введите новое описание цели:")
             await state.set_state(GoalForm.waiting_for_new_desc)
-        
+
         @self.router.message(GoalForm.waiting_for_new_desc)
         async def change_desc(message: types.Message, state: FSMContext):
             data = await state.get_data()
@@ -110,7 +118,6 @@ class GoalHandler:
             if goal:
                 await message.answer("Описание цели было успешно изменено!")
             await state.clear()
-            
 
         def progress_bar(current, total, length=10):
             percent = current / total
@@ -126,7 +133,6 @@ class GoalHandler:
                 await callback.message.answer("Ваш список целей пока что пуст!")
             else:
                 await callback.message.answer("Вот все ваши цели:")
-                
 
                 for index, goal in enumerate(data):
                     await state.update_data(goal_text=goal[0])
@@ -154,8 +160,13 @@ class GoalHandler:
             if isinstance(goal_callback, Goal):
                 await message.answer("Ваши накопления записаны")
             elif goal_callback == 0:
-                await message.answer("Ого, как вы точно расчитали! Цель <b>идеально</b> выполнена", parse_mode="HTML")
+                await message.answer(
+                    "Ого, как вы точно расчитали! Цель <b>идеально</b> выполнена",
+                    parse_mode="HTML",
+                )
             elif goal_callback > 0:
-                await message.answer(f"Поздравляю! Вы выполнили свою цель!!! И даже перевыполнили на {goal_callback}")
+                await message.answer(
+                    f"Поздравляю! Вы выполнили свою цель!!! И даже перевыполнили на {goal_callback}"
+                )
             else:
                 await message.answer("Кажется вы что-то не так ввели")

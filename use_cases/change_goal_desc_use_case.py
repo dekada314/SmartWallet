@@ -18,4 +18,3 @@ class ChangeGoalDescUseCase:
             return goal
         except ValueError:
             print("бе")
-            

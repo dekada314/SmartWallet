@@ -8,7 +8,7 @@ class SqliteGoalsRepository(BaseGoalsRepository):
     def __init__(self, goals_db_path: str):
         self.db_path = goals_db_path
 
-    async def _init_db(self):
+    async def _init_db(self) -> None:
         async with aiosqlite.connect(self.db_path) as db:
             await db.execute("""
                 CREATE TABLE IF NOT EXISTS goals(
@@ -23,7 +23,7 @@ class SqliteGoalsRepository(BaseGoalsRepository):
 
             await db.commit()
 
-    async def get_last_id(self, user_id: int):
+    async def get_last_id(self, user_id: int) -> int:
         async with aiosqlite.connect(self.db_path) as db:
             db.row_factory = aiosqlite.Row
             cursor = await db.execute(
@@ -33,7 +33,7 @@ class SqliteGoalsRepository(BaseGoalsRepository):
             row = await cursor.fetchone()
             return row["last_num"] if row["last_num"] else 0
 
-    async def save_goal(self, goal: Goal):
+    async def save_goal(self, goal: Goal) -> None:
         async with aiosqlite.connect(self.db_path) as db:
             await db.execute(
                 "INSERT INTO goals(user_id, user_goal_id, target, curr_bill, text) VALUES(?, ?, ?, ?, ?)",
@@ -47,14 +47,17 @@ class SqliteGoalsRepository(BaseGoalsRepository):
             )
             await db.commit()
 
-    async def get_all_user_goals(self, user_id: int):
+    async def get_all_user_goals(self, user_id: int) -> list:
         async with aiosqlite.connect(self.db_path) as db:
             db.row_factory = aiosqlite.Row
             cur = await db.execute("SELECT * FROM goals WHERE user_id = ?", (user_id,))
             data = await cur.fetchall()
-            return [[row["text"], row["target"], row["curr_bill"], row["user_goal_id"]] for row in data]
+            return [
+                [row["text"], row["target"], row["curr_bill"], row["user_goal_id"]]
+                for row in data
+            ]
 
-    async def get_goal_attrs(self, user_id: int, user_goal_id: int):
+    async def get_goal_attrs(self, user_id: int, user_goal_id: int) -> Goal:
         async with aiosqlite.connect(self.db_path) as db:
             db.row_factory = aiosqlite.Row
             cursor = await db.execute(
@@ -71,7 +74,7 @@ class SqliteGoalsRepository(BaseGoalsRepository):
             )
             return goal  # noqa
 
-    async def update_goal(self, goal: Goal):
+    async def update_goal(self, goal: Goal) -> None:
         async with aiosqlite.connect(self.db_path) as db:
             await db.execute(
                 "UPDATE goals SET curr_bill = ? WHERE user_id = ? AND user_goal_id = ?",
@@ -79,7 +82,7 @@ class SqliteGoalsRepository(BaseGoalsRepository):
             )
             await db.commit()
 
-    async def delete_goal(self, goal: Goal):
+    async def delete_goal(self, goal: Goal) -> None:
         async with aiosqlite.connect(self.db_path) as db:
             await db.execute(
                 "DELETE FROM goals WHERE user_id = ? AND user_goal_id = ?",
@@ -87,10 +90,19 @@ class SqliteGoalsRepository(BaseGoalsRepository):
             )
 
             await db.commit()
-    async def change_goal_text(self, goal: Goal):
+
+    async def change_goal_text(self, goal: Goal) -> None:
         async with aiosqlite.connect(self.db_path) as db:
             await db.execute(
                 "UPDATE goals SET text = ? WHERE user_id = ? AND user_goal_id = ?",
-                (goal.text, goal.user_id, goal.user_goal_id)
+                (goal.text, goal.user_id, goal.user_goal_id),
             )
             await db.commit()
+
+    async def get_user_goals_count(self, user_id: int) -> int:
+        async with aiosqlite.connect(self.db_path) as db:
+            cursor = await db.execute(
+                "SELECT COUNT(user_goal_id) FROM goals WHERE user_id = ?", (user_id,)
+            )
+            data = await cursor.fetchone()
+            return data[0] if data[0] else 0

@@ -64,5 +64,11 @@ class SQLiteTransactionRepository(BaseTransactionRepository):
             self.conn.commit()
             return None
 
-    async def get_user_transactions_count(self):
-        pass
+    async def get_user_transactions_count(self, user_id: int) -> int:
+        async with aiosqlite.connect(self.db_path) as db:
+            cursor = await db.execute(
+                "SELECT COUNT(transaction_id) FROM transactions WHERE user_id = ?",
+                (user_id,),
+            )
+            data = await cursor.fetchone()
+            return data[0] if data[0] else 0
