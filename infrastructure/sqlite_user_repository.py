@@ -18,7 +18,7 @@ class SQLiteUserRepository(BaseUserRepository):
                         user_name TEXT NOT NULL,
                         balance REAL NOT NULL,
                         created_at DATE,
-                        last_transaction_date DATE
+                        last_action DATE
                          
                 ) 
             """)
@@ -28,13 +28,13 @@ class SQLiteUserRepository(BaseUserRepository):
     async def save_user(self, user: User) -> None:
         async with aiosqlite.connect(self.db_path) as db:
             await db.execute(
-                "INSERT OR REPLACE INTO users(user_id, user_name, balance, created_at, last_transaction_date) VALUES (?, ?, ?, ?, ?)",
+                "INSERT OR REPLACE INTO users(user_id, user_name, balance, created_at, last_action) VALUES (?, ?, ?, ?, ?)",
                 (
                     user.user_id,
                     user.user_name,
                     user.balance,
                     user.created_at,
-                    user.last_transaction_date,
+                    user.last_action,
                 ),
             )
 
@@ -60,15 +60,24 @@ class SQLiteUserRepository(BaseUserRepository):
                     user_name=row["user_name"],
                     balance=row["balance"],
                     created_at=row["created_at"],
-                    last_transaction_date=row["last_transaction_date"],
+                    last_action=row["last_action"],
                 )
             return None
 
     async def update_last_action(self, user_id: int):
         async with aiosqlite.connect(self.db_path) as db:
             await db.execute(
-                "UPDATE users SET last_transaction_date = ? WHERE user_id = ?",
+                "UPDATE users SET last_action = ? WHERE user_id = ?",
                 (datetime.now().strftime("%Y-%m-%d %H:%M:%S"), user_id),
+            )
+
+            await db.commit()
+
+    async def update_balance(self, user_id: int, delta: int | float):
+        async with aiosqlite.connect(self.db_path) as db:
+            await db.execute(
+                "UPDATE users SET balance = balance + ? WHERE user_id = ?",
+                (delta, user_id),
             )
 
             await db.commit()

@@ -82,20 +82,20 @@ class SqliteGoalsRepository(BaseGoalsRepository):
             )
             await db.commit()
 
-    async def delete_goal(self, goal: Goal) -> None:
+    async def delete_goal(self, user_id: int, goal_id: int) -> None:
         async with aiosqlite.connect(self.db_path) as db:
             await db.execute(
                 "DELETE FROM goals WHERE user_id = ? AND user_goal_id = ?",
-                (goal.user_id, goal.user_goal_id),
+                (user_id, goal_id),
             )
 
             await db.commit()
 
-    async def change_goal_text(self, goal: Goal) -> None:
+    async def change_goal_text(self, user_id: int, goal_id: str, new_text: str) -> None:
         async with aiosqlite.connect(self.db_path) as db:
             await db.execute(
                 "UPDATE goals SET text = ? WHERE user_id = ? AND user_goal_id = ?",
-                (goal.text, goal.user_id, goal.user_goal_id),
+                (new_text, user_id, goal_id),
             )
             await db.commit()
 
@@ -106,3 +106,8 @@ class SqliteGoalsRepository(BaseGoalsRepository):
             )
             data = await cursor.fetchone()
             return data[0] if data[0] else 0
+
+    async def get_users(self) -> list[int]:
+        async with aiosqlite.connect(self.db_path) as db:
+            cursor = await db.execute("SELECT user_id FROM goals")
+            return [row[0] for row in await cursor.fetchall()]

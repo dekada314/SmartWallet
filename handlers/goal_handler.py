@@ -95,7 +95,6 @@ class GoalHandler:
         async def handle_delete_goal(callback: CallbackQuery, state: FSMContext):
             await callback.answer()
             user_goal_id = int(callback.data.split("del_goal_")[1])
-            await callback.message.answer(user_goal_id)
 
             goal = await self.delete_goal_us.execute(callback, user_goal_id)
 

@@ -2,6 +2,7 @@ from datetime import date, datetime
 from uuid import UUID, uuid4
 
 from domain.entities.transaction import Transaction
+from domain.entities.user import User
 from model.basic_classifier import BasicClassifier
 from repository.base_categories_repository import BaseCategoriesRepositry
 from repository.base_transaction_repository import BaseTransactionRepository
@@ -27,8 +28,8 @@ class AddExpenseUseCase:
         if not user_id or not text:
             raise ValueError
 
-        amount = self.text_processing.number_searcher(text)
-        main_lemma = self.text_processing.main_noun_searcher(text)[0]
+        amount: float = self.text_processing.number_searcher(text)
+        main_lemma: str = self.text_processing.main_noun_searcher(text)[0]
 
         if not amount or not main_lemma:
             raise ValueError
@@ -44,6 +45,7 @@ class AddExpenseUseCase:
         )
 
         await self.transaction_repositry.save_transaction(user_id, new_transaction)
+        await self.user_repository.update_balance(user_id, -new_transaction.amount)
         await self.user_repository.update_last_action(user_id)
 
         return new_transaction

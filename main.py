@@ -9,12 +9,15 @@ import config
 from handlers.base_handler import BaseHandler
 from handlers.expense_handler import ExpenseHandler
 from handlers.goal_handler import GoalHandler
+from handlers.income_handler import IncomeHandler
 from infrastructure.sqlite_goals_repository import SqliteGoalsRepository
 from infrastructure.sqlite_transaction_repository import SQLiteTransactionRepository
 from infrastructure.sqlite_user_repository import SQLiteUserRepository
 from infrastructure.yaml_categories_repository import YamlCategoriesRepository
 from model.model import SkClassifier
+from services.sheduler import APSCheduler
 from use_cases.add_expense_user_case import AddExpenseUseCase
+from use_cases.add_income_use_case import AddIncomeUseCase
 from use_cases.change_goal_desc_use_case import ChangeGoalDescUseCase
 from use_cases.delete_goal_use_case import DeleteGoalUseCase
 from use_cases.display_user_goals_use_case import DisplayUserGoals
@@ -49,6 +52,7 @@ async def main():
     display_goals_us = DisplayUserGoals(goal_db)
     update_goal_us = UpdateGoalUseCase(goal_db)
     exceeding_limits_us = ExceedingTheLimitUseCase(goal_db)
+    add_income_us = AddIncomeUseCase(user_db)
 
     base_handler = BaseHandler(register_us)
     base_handler.register()
@@ -63,14 +67,19 @@ async def main():
         exceeding_limits_us,
     )
     goal_handler.register()
+    income_handler = IncomeHandler(add_income_us)
+    income_handler.register()
 
     bot = Bot(os.getenv("TOKEN"))
     dp = Dispatcher()
 
+    scheduler = APSCheduler(goal_db, bot)
+    scheduler.start()
+
     dp.include_router(base_handler.router)
     dp.include_router(expense_handler.router)
     dp.include_router(goal_handler.router)
-    dp.startup.register()
+    dp.include_router(income_handler.router)
 
     await bot.delete_webhook(drop_pending_updates=True)
     await dp.start_polling(bot)

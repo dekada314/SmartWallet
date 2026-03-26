@@ -8,7 +8,7 @@ class User:
     user_name: str
     balance: float
     created_at: date
-    last_transaction_date: date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    last_action: date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     def __post_init__(self):
         if self.user_id < 0 or self.balance < 0:
@@ -20,4 +20,10 @@ class User:
 
     def add_amount(self, value: int | float):
         if isinstance(value, (int, float)):
-            self.balance += value
+            if 0 < value < 1_000_000:
+                self.balance += value
+            else:
+                raise ValueError("Недопустимое численное значение!")
+
+    def update_last_action(self) -> None:
+        self.last_action = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
