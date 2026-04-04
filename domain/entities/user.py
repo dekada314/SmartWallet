@@ -11,7 +11,7 @@ class User:
     last_action: date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     def __post_init__(self):
-        if self.user_id < 0 or self.balance < 0:
+        if self.user_id < 0:
             raise ValueError
 
     def change_user_name(self, new_name: str):

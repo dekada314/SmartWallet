@@ -25,7 +25,7 @@ class BaseHandler:
                     reply_markup=Keyboards.get_all_func_buttons(),
                 )
             else:
-                await message.answer("")
+                await message.answer("Похоже вы уже зарегистрированы",reply_markup=Keyboards.get_all_func_buttons())
 
         @self.router.message(Command("info"))
         async def handle_info_command(message: types.Message):

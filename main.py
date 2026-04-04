@@ -15,6 +15,7 @@ from infrastructure.sqlite_transaction_repository import SQLiteTransactionReposi
 from infrastructure.sqlite_user_repository import SQLiteUserRepository
 from infrastructure.yaml_categories_repository import YamlCategoriesRepository
 from model.model import SkClassifier
+from services.get_categories import GetCategories
 from services.sheduler import APSCheduler
 from use_cases.add_expense_user_case import AddExpenseUseCase
 from use_cases.add_income_use_case import AddIncomeUseCase
@@ -53,10 +54,12 @@ async def main():
     update_goal_us = UpdateGoalUseCase(goal_db)
     exceeding_limits_us = ExceedingTheLimitUseCase(goal_db)
     add_income_us = AddIncomeUseCase(user_db)
+    
+    get_categories = GetCategories(categories_kb)
 
     base_handler = BaseHandler(register_us)
     base_handler.register()
-    expense_handler = ExpenseHandler(add_expense_us)
+    expense_handler = ExpenseHandler(add_expense_us, get_categories)
     expense_handler.register()
     goal_handler = GoalHandler(
         save_goal_us,

@@ -65,6 +65,7 @@ class SqliteGoalsRepository(BaseGoalsRepository):
                 (user_id, user_goal_id),
             )
             row = await cursor.fetchone()
+            
             goal = Goal(
                 row["user_id"],
                 row["user_goal_id"],
@@ -82,11 +83,11 @@ class SqliteGoalsRepository(BaseGoalsRepository):
             )
             await db.commit()
 
-    async def delete_goal(self, user_id: int, goal_id: int) -> None:
+    async def delete_goal(self, goal: Goal) -> None:
         async with aiosqlite.connect(self.db_path) as db:
             await db.execute(
                 "DELETE FROM goals WHERE user_id = ? AND user_goal_id = ?",
-                (user_id, goal_id),
+                (goal.user_id, goal.user_goal_id),
             )
 
             await db.commit()

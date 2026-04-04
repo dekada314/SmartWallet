@@ -1,7 +1,9 @@
 import re
+
 import pdfplumber
-from PIL import Image
 import pytesseract
+from PIL import Image
+
 
 class ReceiptParser:
     def __init__(self, knowledge_base=None):

@@ -24,20 +24,25 @@ class AddExpenseUseCase:
         self.text_processing = TextProcessing()
         self.model = classifier
 
-    async def execute(self, user_id: int, text: str) -> Transaction | None:
+    async def execute(self, user_id: int, text: str, category: str = None) -> Transaction | None:
         if not user_id or not text:
             raise ValueError
+        
+        if category is not None:
+            output_category = category
+            amount = float(text)
+        else:
+            amount: float = self.text_processing.number_searcher(text)
+            main_lemma: str = self.text_processing.main_noun_searcher(text)[0]
 
-        amount: float = self.text_processing.number_searcher(text)
-        main_lemma: str = self.text_processing.main_noun_searcher(text)[0]
+            if not amount or not main_lemma:
+                raise ValueError
 
-        if not amount or not main_lemma:
-            raise ValueError
+            output_category = self.categories_repository.keyword_search(main_lemma)
 
-        output_category = self.categories_repository.keyword_search(main_lemma)
-
-        if not output_category:
-            output_category, prob = self.model.predict(main_lemma)
+            if not output_category:
+                output_category, prob = self.model.predict(main_lemma)
+       
 
         new_transaction = Transaction(
             category=output_category,

@@ -1,4 +1,4 @@
-YAML_CATEGORIES = "knowledge_base/categories.yml"
+YAML_CATEGORIES = "knowledge_base/knowledge_base.yml"
 SQLITE_USERS = "knowledge_base/users_db.sqlite3"
 SQLITE_TRANSACTIONS = "knowledge_base/transactions_db.sqlite3"
 SQLITE_GOALS = "knowledge_base/goals_db.sqlite3"

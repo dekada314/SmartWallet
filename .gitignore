@@ -17,4 +17,4 @@ venv/
 # Database
 
 # third-party test files
-test.py
+*test.py
