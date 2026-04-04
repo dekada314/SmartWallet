@@ -83,11 +83,11 @@ class ReceiptParser:
         return result
 
     def _get_category(self, merchant_name: str) -> str:
-        if not self.kb or 'lexicon' not in self.kb:
+        if not self.kb:
             return "unknown"
         
         name_upper = merchant_name.upper()
-        for cat_id, data in self.kb['lexicon'].items():
+        for cat_id, data in self.kb.get_lexicon().items(): 
             if any(key.upper() in name_upper for key in data.get('keywords', [])):
                 return cat_id
         return "unknown"

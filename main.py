@@ -16,6 +16,7 @@ from infrastructure.sqlite_user_repository import SQLiteUserRepository
 from infrastructure.yaml_categories_repository import YamlCategoriesRepository
 from model.model import SkClassifier
 from services.get_categories import GetCategories
+from services.receipt_parser import ReceiptParser
 from services.sheduler import APSCheduler
 from use_cases.add_expense_user_case import AddExpenseUseCase
 from use_cases.add_income_use_case import AddIncomeUseCase
@@ -46,7 +47,6 @@ async def main():
 
     add_expense_us = AddExpenseUseCase(transaction_db, categories_kb, user_db, ml_model)
     register_us = UserRegisterUseCase(user_db)
-    advice_us = GiveAdviceUseCase()
     change_goal_us = ChangeGoalDescUseCase(goal_db)
     delete_goal_us = DeleteGoalUseCase(goal_db)
     save_goal_us = SaveGoalUseCase(goal_db)
@@ -56,10 +56,11 @@ async def main():
     add_income_us = AddIncomeUseCase(user_db)
     
     get_categories = GetCategories(categories_kb)
+    receipt_parser = ReceiptParser(categories_kb)
 
     base_handler = BaseHandler(register_us)
     base_handler.register()
-    expense_handler = ExpenseHandler(add_expense_us, get_categories)
+    expense_handler = ExpenseHandler(add_expense_us, get_categories, receipt_parser)
     expense_handler.register()
     goal_handler = GoalHandler(
         save_goal_us,
