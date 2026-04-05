@@ -1,0 +1,47 @@
+@startuml
+skinparam defaultFontName Arial
+skinparam backgroundColor white
+
+title ER-диаграмма основной базы знаний «Умный кошелёк»
+
+entity "Category\n(Категория)" as CAT {
+  * id : string <<PK>>
+  --
+  * name : string
+  * is_essential : boolean
+  * priority : integer [1..5]
+  parent : string <<FK>>
+}
+
+entity "Keyword\n(Ключевое слово)" as KW {
+  * word : string <<PK>>
+  --
+  * category_id : string <<FK>>
+}
+
+entity "Rule\n(Правило)" as RULE {
+  * id : string <<PK>>
+  --
+  * condition : string
+  * text : string
+}
+
+entity "TrainingExample\n(Обучающий пример)" as TR {
+  * text : string <<PK>>
+  --
+  * category_id : string <<FK>>
+}
+
+entity "MLModel\n(ML-модель)" as ML {
+  * model_path : string <<PK>>
+  --
+  * vectorizer_path : string
+}
+
+CAT ||--o{ CAT       : "parent (is-a)"
+CAT ||--o{ KW        : "имеет ключевые слова"
+CAT ||--o{ RULE      : "участвует в условии"
+CAT ||--o{ TR        : "размечает примеры"
+TR  }o--|| ML        : "обучает"
+
+@enduml

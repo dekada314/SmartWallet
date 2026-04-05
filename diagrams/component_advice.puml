@@ -1,0 +1,72 @@
+@startuml
+skinparam componentStyle rectangle
+skinparam defaultFontName Arial
+skinparam backgroundColor white
+
+title Место базы знаний советов\nв архитектуре системы «Умный кошелёк»
+
+actor "Пользователь" as User
+actor "Разработчик\n(эксперт)" as Dev
+
+package "Telegram Bot" {
+
+    [Handlers\n(интерфейс)] as H
+
+    package "Бизнес-логика" {
+        [AddExpenseUseCase] as AE
+        [GiveAdviceUseCase] as GA
+        [NotificationUseCase] as NA
+    }
+
+    package "Классификация" {
+        [YamlCategoriesRepository] as YCR
+        [SkClassifier] as ML
+    }
+
+    package "Сервисы" {
+        [Scheduler] as SC
+    }
+
+    database "transactions_db\n.sqlite3" as TDB
+    database "users_db\n.sqlite3" as UDB
+}
+
+package "База знаний советов\n(предмет работы)" #LightGreen {
+    file "advices.yml" as AKB
+}
+
+package "Основная БЗ\n" #LightGray {
+    file "knowledge_base.yml" as KB
+}
+
+User  --> H       : ввод транзакции /\nзапрос совета
+Dev   --> AKB     : пополнение\nсоветами
+
+H  --> AE
+H  --> GA
+H  --> NA
+
+AE --> YCR
+AE --> ML
+AE --> TDB
+AE --> UDB
+
+YCR --> KB
+ML  --> KB
+
+AE --> GA         : категория\nтранзакции
+
+GA --> AKB        : выборка совета\nпо категории
+GA --> TDB        : анализ\nистории трат
+
+SC --> GA         : плановый\nзапрос совета
+
+note bottom of GA
+  Единственный компонент,
+  обращающийся к БЗ советов.
+  Получает категорию от AE,
+  возвращает текст совета
+  пользователю.
+end note
+
+@enduml

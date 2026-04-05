@@ -1,0 +1,48 @@
+@startuml
+skinparam defaultFontName Arial
+skinparam backgroundColor white
+
+title ER-диаграмма базы знаний советов «Умный кошелёк»
+
+entity "Advice\n(Совет)" as ADV {
+  * id : string <<PK>>
+  --
+  * name : string
+  * description : text
+  * category : string <<FK>>
+}
+
+entity "AdviceCategory\n(Тип категории)" as ACAT {
+  * category_id : string <<PK>>
+  --
+  * type : enum {categorical, common}
+}
+
+entity "Transaction\n(Транзакция)" as TX {
+  * id : uuid <<PK>>
+  --
+  * category : string <<FK>>
+  * amount : float
+  * created_at : datetime
+}
+
+entity "User\n(Пользователь)" as USR {
+  * user_id : integer <<PK>>
+  --
+  * balance : float
+  * last_action : datetime
+}
+
+entity "GiveAdviceUseCase\n(Решатель советов)" as GA {
+  * запрос : category_id
+  --
+  * результат : advice.description
+}
+
+ACAT ||--o{ ADV  : "категория содержит советы"
+ADV  }o--|| GA   : "выбирается решателем"
+TX   }o--|| GA   : "передаёт категорию"
+TX   }o--|| USR  : "принадлежит"
+GA   --> USR     : "отправляет совет"
+
+@enduml
