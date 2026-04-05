@@ -1,0 +1,69 @@
+@startuml
+skinparam componentStyle rectangle
+skinparam defaultFontName Arial
+skinparam backgroundColor white
+
+title Архитектура системы «Умный кошелёк»\nМесто основной базы знаний
+
+actor "Пользователь" as User
+
+package "Telegram Bot" {
+
+    package "Интерфейс" {
+        [Handlers] as H
+        [Keyboards] as K
+    }
+
+    package "Бизнес-логика" {
+        [Use Cases] as UC
+    }
+
+    package "Классификация" {
+        [YamlCategoriesRepository] as YCR
+        [SkClassifier\n(TF-IDF + LogReg)] as ML
+    }
+
+    package "Сервисы" {
+        [TextProcessing] as TP
+        [ReceiptParser] as RP
+        [Scheduler] as SC
+    }
+
+    package "Хранилище оперативных данных" {
+        database "users_db.sqlite3" as UDB
+        database "transactions_db.sqlite3" as TDB
+        database "goals_db.sqlite3" as GDB
+    }
+}
+
+package "База знаний (предмет работы)" #LightGray {
+    file "knowledge_base.yml\n(онтология, лексикон, правила)" as KB
+    file "dataset.csv\n(обучающая выборка)" as DS
+    file "model.joblib\n(веса модели)" as MJ
+}
+
+User --> H : сообщения / кнопки
+H --> UC
+H --> K
+UC --> YCR : поиск по лексикону
+UC --> ML : классификация
+UC --> TP : предобработка текста
+UC --> RP : разбор чека
+UC --> SC : уведомления
+UC --> UDB
+UC --> TDB
+UC --> GDB
+
+YCR --> KB : чтение лексикона\nи онтологии
+ML --> KB : чтение правил
+ML --> DS : чтение датасета
+ML --> MJ : загрузка весов
+
+note right of KB
+  Единственный источник
+  экспертных знаний.
+  Модифицируется вручную
+  разработчиком.
+end note
+
+@enduml
