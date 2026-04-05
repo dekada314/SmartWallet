@@ -31,7 +31,7 @@ package "Telegram Bot" {
     database "users_db\n.sqlite3" as UDB
 }
 
-package "База знаний советов\n(предмет работы)" #LightGreen {
+package "База знаний советов\n" #LightGreen {
     file "advices.yml" as AKB
 }
 
