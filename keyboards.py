@@ -17,6 +17,7 @@ class Keyboards:
                     KeyboardButton(text="Ввести доход"),
                 ],
                 [KeyboardButton(text="Цели"), KeyboardButton(text="Аналитика")],
+                [KeyboardButton(text="Получить совет")],
             ],
             resize_keyboard=True,
         )

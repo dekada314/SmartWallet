@@ -9,6 +9,7 @@ import config
 from handlers.base_handler import BaseHandler
 from handlers.expense_handler import ExpenseHandler
 from handlers.goal_handler import GoalHandler
+from handlers.advice_handler import AdviceHandler
 from handlers.income_handler import IncomeHandler
 from infrastructure.sqlite_goals_repository import SqliteGoalsRepository
 from infrastructure.sqlite_transaction_repository import SQLiteTransactionRepository
@@ -54,7 +55,7 @@ async def main():
     update_goal_us = UpdateGoalUseCase(goal_db)
     exceeding_limits_us = ExceedingTheLimitUseCase(goal_db)
     add_income_us = AddIncomeUseCase(user_db)
-    
+    give_advice_us = GiveAdviceUseCase(config.YAML_ADVICES)
     get_categories = GetCategories(categories_kb)
     receipt_parser = ReceiptParser(categories_kb)
 
@@ -73,6 +74,8 @@ async def main():
     goal_handler.register()
     income_handler = IncomeHandler(add_income_us)
     income_handler.register()
+    advice_handler = AdviceHandler(give_advice_us)
+    advice_handler.register()
 
     bot = Bot(os.getenv("TOKEN"))
     dp = Dispatcher()
@@ -84,6 +87,7 @@ async def main():
     dp.include_router(expense_handler.router)
     dp.include_router(goal_handler.router)
     dp.include_router(income_handler.router)
+    dp.include_router(advice_handler.router)
 
     await bot.delete_webhook(drop_pending_updates=True)
     await dp.start_polling(bot)
