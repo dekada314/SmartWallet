@@ -1,0 +1,80 @@
+@startuml
+skinparam defaultFontName Arial
+skinparam backgroundColor white
+skinparam actorStyle awesome
+left to right direction
+
+title Use-Case диаграмма\nИнтеллектуальная система «Умный кошелёк»
+
+actor "Пользователь" as User
+actor "Разработчик\n(эксперт)" as Dev
+actor "Планировщик\n(Scheduler)" as Sched
+
+rectangle "Интеллектуальная система «Умный кошелёк»" {
+
+    rectangle "Управление транзакциями" {
+        usecase "Ввести расход текстом" as UC1
+        usecase "Ввести расход через чек" as UC2
+        usecase "Ввести доход" as UC3
+    }
+
+    rectangle "Классификация\n(Основная БЗ)" #LightBlue {
+        usecase "Найти категорию\nпо лексикону" as UC4
+        usecase "Классифицировать\nчерез ML-модель" as UC5
+        usecase "Применить\nпродукционное правило" as UC6
+    }
+
+    rectangle "Рекомендации\n(БЗ советов)" #LightGreen {
+        usecase "Получить совет\nпо категории" as UC7
+        usecase "Получить плановое\nуведомление с советом" as UC8
+        usecase "Запросить совет\nвручную" as UC9
+    }
+
+    rectangle "Управление целями" {
+        usecase "Создать\nфинансовую цель" as UC10
+        usecase "Просмотреть\nпрогресс по целям" as UC11
+    }
+
+    rectangle "Обслуживание баз знаний" {
+        usecase "Пополнить лексикон\nключевых слов" as UC12
+        usecase "Добавить\nпродукционное правило" as UC13
+        usecase "Добавить совет\nв advices.yml" as UC14
+        usecase "Переобучить\nML-модель" as UC15
+    }
+}
+
+User --> UC1
+User --> UC2
+User --> UC3
+User --> UC9
+User --> UC10
+User --> UC11
+
+UC1 ..> UC4 : <<include>>
+UC2 ..> UC4 : <<include>>
+UC4 ..> UC5 : <<extend>>\n(если нет совпадения)
+UC4 ..> UC6 : <<include>>
+UC1 ..> UC7 : <<extend>>\n(после классификации)
+
+Sched --> UC8
+UC8 ..> UC7 : <<include>>
+UC9 ..> UC7 : <<include>>
+
+Dev --> UC12
+Dev --> UC13
+Dev --> UC14
+Dev --> UC15
+
+note right of UC4
+  Основная БЗ:
+  knowledge_base.yml
+  (онтология + лексикон)
+end note
+
+note right of UC7
+  БЗ советов:
+  advices.yml
+  (рекомендации по категориям)
+end note
+
+@enduml
