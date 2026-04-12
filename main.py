@@ -6,10 +6,10 @@ from aiogram import Bot, Dispatcher
 from dotenv import load_dotenv
 
 import config
+from handlers.advice_handler import AdviceHandler
 from handlers.base_handler import BaseHandler
 from handlers.expense_handler import ExpenseHandler
 from handlers.goal_handler import GoalHandler
-from handlers.advice_handler import AdviceHandler
 from handlers.income_handler import IncomeHandler
 from infrastructure.sqlite_goals_repository import SqliteGoalsRepository
 from infrastructure.sqlite_transaction_repository import SQLiteTransactionRepository
