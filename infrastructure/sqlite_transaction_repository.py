@@ -22,13 +22,24 @@ class SQLiteTransactionRepository(BaseTransactionRepository):
         """)
 
             await db.commit()
+            
+    async def get_last_id(self, user_id: int):
+        async with aiosqlite.connect(self.db_path) as db:
+            db.row_factory = aiosqlite.Row
+            cursor = await db.execute(
+                "SELECT MAX(user_transaction_id) AS last_id FROM transactions WHERE user_id = ?",
+                (user_id, )
+            )
+            row = await cursor.fetchone()[0]
+            return row["last_id"] if row["last_id"] else 0
+            
 
-    async def save_transaction(self, user_id: int, transaction: Transaction) -> None:
+    async def save_transaction(self, transaction: Transaction) -> None:
         async with aiosqlite.connect(self.db_path) as db:
             await db.execute(
                 "INSERT OR REPLACE INTO transactions(user_id, user_transaction_id, category, amount, created_at) VALUES(?, ?, ?, ?, ?)",
                 (
-                    user_id,
+                    transaction.user_id,
                     transaction.user_transaction_id,
                     transaction.category,
                     transaction.amount,

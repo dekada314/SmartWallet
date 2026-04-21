@@ -35,8 +35,8 @@ class AddExpenseUseCase:
             output_category = category
             amount = float(dto.text)
         else:
-            amount: float = self.text_processing.number_searcher(text)
-            main_lemma: str = self.text_processing.main_noun_searcher(text)[0]
+            amount: float = self.text_processing.number_searcher(dto.text)
+            main_lemma: str = self.text_processing.main_noun_searcher(dto.text)[0]
 
             if not amount or not main_lemma:
                 raise ValueError
@@ -47,12 +47,14 @@ class AddExpenseUseCase:
                 output_category, prob = self.model.predict(main_lemma)
 
         new_transaction = Transaction(
+            user_id=dto.owner_id,
+            user_transaction_id=self.transaction_repositry.get_last_id(dto.owner_id) + 1,
             category=output_category,
             amount=amount,
         )
 
-        await self.transaction_repositry.save_transaction(user_id, new_transaction)
-        await self.user_repository.update_balance(user_id, -new_transaction.amount)
-        await self.user_repository.update_last_action(user_id)
-
+        await self.transaction_repositry.save_transaction(new_transaction)
+        await self.user_repository.update_balance(new_transaction.user_id, -new_transaction.amount)
+        await self.user_repository.update_last_action(new_transaction.user_id)
+ 
         return new_transaction

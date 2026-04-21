@@ -10,7 +10,7 @@ from aiogram.types import (
 )
 from aiogram.utils.markdown import hbold, hcode, hitalic, hlink
 from pydantic import ValidationError
-from save_transaction_request import SaveTransactionRequest
+from handlers.save_transaction_request import SaveTransactionRequest
 
 from domain.entities.transaction import Transaction
 from keyboards import Keyboards
@@ -82,7 +82,7 @@ class ExpenseHandler:
                         _transaction_format(transaction),
                         parse_mode="HTML",
                     )
-            except:
+            except ValidationError:
                 await message.answer("Вы некорректно ввели данные!")
             finally:
                 await state.clear()
@@ -118,8 +118,10 @@ class ExpenseHandler:
 
             data = await state.get_data()
             user_category = data.get("user_category")
-            
-            transaction_dto = SaveTransactionRequest(owner_id=message.from_user.id, text=amount)
+
+            transaction_dto = SaveTransactionRequest(
+                owner_id=message.from_user.id, text=amount
+            )
 
             transaction = await self.add_expense_us.execute(
                 dto=transaction_dto, category=user_category
@@ -180,4 +182,4 @@ class ExpenseHandler:
                         _transaction_format(transaction), parse_mode="HTML"
                     )
             except ValidationError:
-                await message.answer("❌ Неверный формат ввода") 
+                await message.answer("❌ Неверный формат ввода")

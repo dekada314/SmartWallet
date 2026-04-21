@@ -14,7 +14,7 @@ class YamlCategoriesRepository(BaseCategoriesRepositry):
 
     def get_all_keywords(self):
         with open(self.kb, "r", encoding="utf-8") as file:
-            data = yaml.safe_load(file)["ontology"]["lexicon"]
+            data = yaml.safe_load(file)["lexicon"]
 
     def get_lexicon(self):
         with open(self.kb, "r", encoding="utf-8") as file:

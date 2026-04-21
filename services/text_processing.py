@@ -16,6 +16,18 @@ class TextProcessing:
 
         return output
 
-    def number_searcher(self, text: str) -> float:
-        number = re.search(r"\d+", text)
-        return float(number.group())
+    def extract_amount(self, input_text: str) -> float:
+        input_text = input_text.lower()
+        
+        number_pattern = r"(\d+[.,]?\d*)"
+        patterns = [
+            rf"{number_pattern}\s*(?:р|руб|byn|\$)?",
+            rf"(?:за|стоимость|цена)\s+{number_pattern}",
+            number_pattern
+        ]
+        for pattern in patterns:
+            match = re.search(pattern=pattern, text=input_text)
+            if match:
+                return float(match.group(1).replace(",", "."))
+            
+        return None
