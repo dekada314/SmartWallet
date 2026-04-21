@@ -10,20 +10,20 @@ class YamlCategoriesRepository(BaseCategoriesRepositry):
 
     def get_all_categories(self) -> dict:
         with open(self.kb, "r", encoding="utf-8") as file:
-            return yaml.safe_load(file)["ontology"]['categories']
-        
+            return yaml.safe_load(file)["ontology"]["categories"]
+
     def get_all_keywords(self):
-        with open(self.kb, 'r', encoding='utf-8') as file:
-            data = yaml.safe_load(file)["ontology"]["lexicon"] 
-            
+        with open(self.kb, "r", encoding="utf-8") as file:
+            data = yaml.safe_load(file)["lexicon"]
+
     def get_lexicon(self):
-        with open(self.kb, 'r', encoding='utf-8') as file:
+        with open(self.kb, "r", encoding="utf-8") as file:
             return yaml.safe_load(file)["lexicon"]
 
     def keyword_search(self, keyword: str) -> str | None:
         output_category = None
         categories = self.get_all_keywords()
-        for category, data in categories.items(): 
+        for category, data in categories.items():
             if keyword in data["keywords"]:
                 output_category = category
 

@@ -4,6 +4,8 @@ from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import CallbackQuery
 
 from domain.entities.goal import Goal
+from handlers.del_goal_request import DelGoalRequest
+from handlers.save_goal_request import SaveGoalRequest
 from keyboards import Keyboards
 from use_cases.change_goal_desc_use_case import ChangeGoalDescUseCase
 from use_cases.delete_goal_use_case import DeleteGoalUseCase
@@ -48,7 +50,7 @@ class GoalHandler:
         @self.router.callback_query(F.data == "save_goal")
         async def handle_save_goal(callback: CallbackQuery, state: FSMContext):
             await callback.answer()
-            if await self.exceeding_the_limits_us.execute(callback):
+            if await self.exceeding_the_limits_us.execute(callback.from_user.id):
                 await callback.message.answer("Напишите описание вашей цели:")
                 await state.set_state(GoalForm.waiting_for_goal)
             else:
@@ -69,7 +71,10 @@ class GoalHandler:
             data = await state.get_data()
             goal_text = data.get("goal_description")
             await state.clear()
-            goal = await self.save_goal_us.execute(message, goal_text)
+            save_goal_request = SaveGoalRequest(
+                user_id=message.from_user.id, amount=message.text, text=goal_text
+            )
+            goal = await self.save_goal_us.execute(save_goal_request)
             if goal:
                 await message.answer("Цель успешно сохранена!")
             else:
@@ -92,11 +97,13 @@ class GoalHandler:
                 )
 
         @self.router.callback_query(F.data.startswith("del_goal_"))
-        async def handle_delete_goal(callback: CallbackQuery, state: FSMContext):
+        async def handle_delete_goal(callback: CallbackQuery):
             await callback.answer()
             user_goal_id = int(callback.data.split("del_goal_")[1])
+            
+            del_goal_request = DelGoalRequest(user_id=callback.from_user.id, user_goal_id=user_goal_id)
 
-            goal = await self.delete_goal_us.execute(callback, user_goal_id)
+            goal = await self.delete_goal_us.execute(del_goal_request)
 
             if goal:
                 await callback.message.answer("Цель успешно удалена")

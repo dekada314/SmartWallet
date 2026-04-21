@@ -22,14 +22,25 @@ class SQLiteTransactionRepository(BaseTransactionRepository):
         """)
 
             await db.commit()
+            
+    async def get_last_id(self, user_id: int):
+        async with aiosqlite.connect(self.db_path) as db:
+            db.row_factory = aiosqlite.Row
+            cursor = await db.execute(
+                "SELECT MAX(user_transaction_id) AS last_id FROM transactions WHERE user_id = ?",
+                (user_id, )
+            )
+            row = await cursor.fetchone()[0]
+            return row["last_id"] if row["last_id"] else 0
+            
 
-    async def save_transaction(self, user_id: int, transaction: Transaction) -> None:
+    async def save_transaction(self, transaction: Transaction) -> None:
         async with aiosqlite.connect(self.db_path) as db:
             await db.execute(
-                "INSERT OR REPLACE INTO transactions(user_id, transaction_id, category, amount, created_at) VALUES(?, ?, ?, ?, ?)",
+                "INSERT OR REPLACE INTO transactions(user_id, user_transaction_id, category, amount, created_at) VALUES(?, ?, ?, ?, ?)",
                 (
-                    user_id,
-                    transaction.transaction_id,
+                    transaction.user_id,
+                    transaction.user_transaction_id,
                     transaction.category,
                     transaction.amount,
                     transaction.created_at.strftime("%Y-%m-%d %H:%M:%S"),
@@ -37,10 +48,10 @@ class SQLiteTransactionRepository(BaseTransactionRepository):
             )
             await db.commit()
 
-    async def delete_by_transaction_id(self, transaction_id: int) -> None:
+    async def delete_by_transaction_id(self, user_id, user_transaction_id: int) -> None:
         async with aiosqlite.connect(self.db_path) as db:
             await db.execute(
-                "DELETE FROM transactions WHERE transaction_id = ?", (transaction_id,)
+                "DELETE FROM transactions WHERE user_id = ? AND user_transaction_id = ?", (user_id, user_transaction_id)
             )
 
             await db.commit()
@@ -67,7 +78,7 @@ class SQLiteTransactionRepository(BaseTransactionRepository):
     async def get_user_transactions_count(self, user_id: int) -> int:
         async with aiosqlite.connect(self.db_path) as db:
             cursor = await db.execute(
-                "SELECT COUNT(transaction_id) FROM transactions WHERE user_id = ?",
+                "SELECT COUNT(user_transaction_id) FROM transactions WHERE user_id = ?",
                 (user_id,),
             )
             data = await cursor.fetchone()
