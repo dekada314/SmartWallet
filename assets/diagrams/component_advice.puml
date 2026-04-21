@@ -6,67 +6,59 @@ skinparam backgroundColor white
 title Место базы знаний советов\nв архитектуре системы «Умный кошелёк»
 
 actor "Пользователь" as User
-actor "Разработчик\n(эксперт)" as Dev
+actor "Разработчик\n(эксперт)" as Developer
 
-package "Telegram Bot" {
+package "Telegram Бот" {
 
-    [Handlers\n(интерфейс)] as H
+    [Обработчики\n(интерфейс)] as Handlers
 
     package "Бизнес-логика" {
-        [AddExpenseUseCase] as AE
-        [GiveAdviceUseCase] as GA
-        [NotificationUseCase] as NA
+        [Сценарий добавления траты] as AddExpenseUseCase
+        [Сценарий выдачи совета] as GiveAdviceUseCase
+        [Сценарий уведомления] as NotificationUseCase
     }
 
     package "Классификация" {
-        [YamlCategoriesRepository] as YCR
-        [SkClassifier] as ML
+        [Репозиторий категорий YAML] as YamlCategoriesRepository
+        [Классификатор] as SkClassifier
     }
 
     package "Сервисы" {
-        [Scheduler] as SC
+        [Планировщик] as Scheduler
     }
 
-    database "transactions_db\n.sqlite3" as TDB
-    database "users_db\n.sqlite3" as UDB
+    database "transactions_db\n.sqlite3" as TransactionDB
+    database "users_db\n.sqlite3" as UserDB
 }
 
-package "База знаний советов\n" #LightGreen {
-    file "advices.yml" as AKB
+package "База знаний советов" {
+    file "advices.yml" as AdviceKnowledgeBase
 }
 
-package "Основная БЗ\n" #LightGray {
-    file "knowledge_base.yml" as KB
+package "Основная БЗ" {
+    file "knowledge_base.yml" as KnowledgeBase
 }
 
-User  --> H       : ввод транзакции /\nзапрос совета
-Dev   --> AKB     : пополнение\nсоветами
+User --> Handlers : ввод транзакции /\nзапрос совета
+Developer --> AdviceKnowledgeBase : пополнение\nсоветами
 
-H  --> AE
-H  --> GA
-H  --> NA
+Handlers --> AddExpenseUseCase
+Handlers --> GiveAdviceUseCase
+Handlers --> NotificationUseCase
 
-AE --> YCR
-AE --> ML
-AE --> TDB
-AE --> UDB
+AddExpenseUseCase --> YamlCategoriesRepository
+AddExpenseUseCase --> SkClassifier
+AddExpenseUseCase --> TransactionDB
+AddExpenseUseCase --> UserDB
 
-YCR --> KB
-ML  --> KB
+YamlCategoriesRepository --> KnowledgeBase
+SkClassifier --> KnowledgeBase
 
-AE --> GA         : категория\nтранзакции
+AddExpenseUseCase --> GiveAdviceUseCase : категория\nтранзакции
 
-GA --> AKB        : выборка совета\nпо категории
-GA --> TDB        : анализ\nистории трат
+GiveAdviceUseCase --> AdviceKnowledgeBase : выборка совета\nпо категории
+GiveAdviceUseCase --> TransactionDB : анализ\nистории трат
 
-SC --> GA         : плановый\nзапрос совета
-
-note bottom of GA
-  Единственный компонент,
-  обращающийся к БЗ советов.
-  Получает категорию от AE,
-  возвращает текст совета
-  пользователю.
-end note
+Scheduler --> GiveAdviceUseCase : плановый\nзапрос совета
 
 @enduml

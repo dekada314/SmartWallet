@@ -7,63 +7,56 @@ title Архитектура системы «Умный кошелёк»\nМе�
 
 actor "Пользователь" as User
 
-package "Telegram Bot" {
+package "Telegram Бот" {
 
     package "Интерфейс" {
-        [Handlers] as H
-        [Keyboards] as K
+        [Обработчики] as Handlers
+        [Клавиатуры] as Keyboards
     }
 
     package "Бизнес-логика" {
-        [Use Cases] as UC
+        [Сценарии использования] as UseCases
     }
 
     package "Классификация" {
-        [YamlCategoriesRepository] as YCR
-        [SkClassifier\n(TF-IDF + LogReg)] as ML
+        [Репозиторий категорий YAML] as YamlCategoriesRepository
+        [Классификатор\n(TF-IDF + Логистическая регрессия)] as SkClassifier
     }
 
     package "Сервисы" {
-        [TextProcessing] as TP
-        [ReceiptParser] as RP
-        [Scheduler] as SC
+        [Обработка текста] as TextProcessing
+        [Парсер чеков] as ReceiptParser
+        [Планировщик] as Scheduler
     }
 
     package "Хранилище оперативных данных" {
-        database "users_db.sqlite3" as UDB
-        database "transactions_db.sqlite3" as TDB
-        database "goals_db.sqlite3" as GDB
+        database "users_db.sqlite3" as UserDB
+        database "transactions_db.sqlite3" as TransactionDB
+        database "goals_db.sqlite3" as GoalDB
     }
 }
 
-package "База знаний (предмет работы)" #LightGray {
-    file "knowledge_base.yml\n(онтология, лексикон, правила)" as KB
-    file "dataset.csv\n(обучающая выборка)" as DS
-    file "model.joblib\n(веса модели)" as MJ
+package "База знаний (предмет работы)" {
+    file "knowledge_base.yml\n(онтология, лексикон, правила)" as KnowledgeBase
+    file "dataset.csv\n(обучающая выборка)" as Dataset
+    file "model.joblib\n(веса модели)" as Model
 }
 
-User --> H : сообщения / кнопки
-H --> UC
-H --> K
-UC --> YCR : поиск по лексикону
-UC --> ML : классификация
-UC --> TP : предобработка текста
-UC --> RP : разбор чека
-UC --> SC : уведомления
-UC --> UDB
-UC --> TDB
-UC --> GDB
+User --> Handlers : сообщения / кнопки
+Handlers --> UseCases
+Handlers --> Keyboards
+UseCases --> YamlCategoriesRepository : поиск по лексикону
+UseCases --> SkClassifier : классификация
+UseCases --> TextProcessing : предобработка текста
+UseCases --> ReceiptParser : разбор чека
+UseCases --> Scheduler : уведомления
+UseCases --> UserDB
+UseCases --> TransactionDB
+UseCases --> GoalDB
 
-YCR --> KB : чтение лексикона\nи онтологии
-ML --> KB : чтение правил
-ML --> DS : чтение датасета
-ML --> MJ : загрузка весов
-
-note right of KB
-  Единственный источник
-  экспертных знаний.
-  Модифицируется вручную
-  разработчиком.
-end note
+YamlCategoriesRepository --> KnowledgeBase : чтение лексикона\nи онтологии
+SkClassifier --> KnowledgeBase : чтение правил
+SkClassifier --> Dataset : чтение датасета
+SkClassifier --> Model : загрузка весов
 
 @enduml
