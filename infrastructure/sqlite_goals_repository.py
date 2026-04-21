@@ -65,7 +65,7 @@ class SqliteGoalsRepository(BaseGoalsRepository):
                 (user_id, user_goal_id),
             )
             row = await cursor.fetchone()
-            
+
             goal = Goal(
                 row["user_id"],
                 row["user_goal_id"],

@@ -11,7 +11,7 @@ class DeleteGoalUseCase:
     async def execute(self, message: CallbackQuery, goal_id: int) -> None:
         if not message.from_user.id or not goal_id:
             return
-        
+
         goal: Goal = await self.goal_repository.get_goal_attrs(
             message.from_user.id, goal_id
         )

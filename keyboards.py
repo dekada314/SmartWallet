@@ -75,7 +75,7 @@ class Keyboards:
                 ]
             ]
         )
-        
+
     @staticmethod
     def get_enter_expense_buttons() -> InlineKeyboardMarkup:
         return InlineKeyboardMarkup(
@@ -89,6 +89,10 @@ class Keyboards:
                         callback_data=f"enter_by_buttons",
                     ),
                 ],
-                [InlineKeyboardButton(text="Сбросить чек", callback_data="enter_by_check")]
+                [
+                    InlineKeyboardButton(
+                        text="Сбросить чек", callback_data="enter_by_check"
+                    )
+                ],
             ]
         )

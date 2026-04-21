@@ -12,20 +12,20 @@ class ReceiptParser:
     def parse_file(self, file_path: str):
         """Основной метод: принимает путь к файлу, извлекает текст и парсит его"""
         text = ""
-        extension = file_path.split('.')[-1].lower()
+        extension = file_path.split(".")[-1].lower()
 
         try:
-            if extension == 'pdf':
+            if extension == "pdf":
                 text = self._extract_text_from_pdf(file_path)
-            elif extension in ['jpg', 'jpeg', 'png', 'bmp']:
+            elif extension in ["jpg", "jpeg", "png", "bmp"]:
                 text = self._extract_text_from_image(file_path)
             else:
                 print(f"❌ Формат {extension} не поддерживается")
                 return None
-            
+
             if not text:
                 return None
-                
+
             return self.detect_bank_and_parse(text)
         except Exception as e:
             print(f"❌ Ошибка при обработке файла: {e}")
@@ -46,7 +46,7 @@ class ReceiptParser:
         # Если ты на Windows, раскомментируй строку ниже и укажи путь к tesseract.exe
         # pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
         image = Image.open(file_path)
-        return pytesseract.image_to_string(image, lang='rus+eng')
+        return pytesseract.image_to_string(image, lang="rus+eng")
 
     def parse_alfa(self, text: str) -> dict:
         """Парсинг специфического формата Альфа-Банка"""
@@ -55,19 +55,19 @@ class ReceiptParser:
             "merchant": None,
             "amount": 0.0,
             "date": None,
-            "category": "unknown"
+            "category": "unknown",
         }
 
         # Очистка текста от лишних кавычек и переносов, которые бывают в PDF
-        clean_text = text.replace('"', '').replace('\r', '')
+        clean_text = text.replace('"', "").replace("\r", "")
 
         # 1. Поиск суммы
         amount_match = re.search(r"Сумма\s*(\d+[.,]\d{2})\s*BYN", clean_text)
-        if not amount_match: # Запасной вариант
+        if not amount_match:  # Запасной вариант
             amount_match = re.search(r"(\d+[.,]\d{2})\s*BYN", clean_text)
-            
+
         if amount_match:
-            result["amount"] = float(amount_match.group(1).replace(',', '.'))
+            result["amount"] = float(amount_match.group(1).replace(",", "."))
 
         # 2. Поиск магазина (после 'Наименование получателя')
         merchant_match = re.search(r"Наименование получателя\s*(.*)", clean_text)
@@ -85,10 +85,10 @@ class ReceiptParser:
     def _get_category(self, merchant_name: str) -> str:
         if not self.kb:
             return "unknown"
-        
+
         name_upper = merchant_name.upper()
-        for cat_id, data in self.kb.get_lexicon().items(): 
-            if any(key.upper() in name_upper for key in data.get('keywords', [])):
+        for cat_id, data in self.kb.get_lexicon().items():
+            if any(key.upper() in name_upper for key in data.get("keywords", [])):
                 return cat_id
         return "unknown"
 

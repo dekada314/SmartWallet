@@ -5,11 +5,11 @@ from uuid import UUID, uuid4
 
 @dataclass(slots=True)
 class Transaction:
+    user_id: int
+    user_transaction_id: int
     category: str
     amount: float
     created_at: date = datetime.now()
-    # created_at: date = datetime.now()
-    transaction_id: str = str(uuid4())
 
     def __post_init__(self):
         if not isinstance(self.category, str):

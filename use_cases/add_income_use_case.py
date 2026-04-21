@@ -42,4 +42,4 @@ class AddIncomeUseCase:
             return user.balance
 
         except Exception as e:
-            raise ValueError('asd')
+            raise ValueError("asd")

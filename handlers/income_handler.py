@@ -28,6 +28,8 @@ class IncomeHandler:
             try:
                 new_balance = await self.add_income_us.execute(message)
                 if new_balance:
-                    await message.answer(f"Ваше новое значение баланса {new_balance:.0f}")
+                    await message.answer(
+                        f"Ваше новое значение баланса {new_balance:.0f}"
+                    )
             except Exception as e:
                 await message.answer(str(e))

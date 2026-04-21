@@ -3,6 +3,7 @@ from uuid import UUID, uuid4
 
 from domain.entities.transaction import Transaction
 from domain.entities.user import User
+from handlers.save_transaction_request import SaveTransactionRequest
 from model.basic_classifier import BasicClassifier
 from repository.base_categories_repository import BaseCategoriesRepositry
 from repository.base_transaction_repository import BaseTransactionRepository
@@ -24,13 +25,15 @@ class AddExpenseUseCase:
         self.text_processing = TextProcessing()
         self.model = classifier
 
-    async def execute(self, user_id: int, text: str, category: str = None) -> Transaction | None:
-        if not user_id or not text:
+    async def execute(
+        self, dto: SaveTransactionRequest, category: str = None
+    ) -> Transaction | None:
+        if not dto.owner_id or not dto.text:
             raise ValueError
-        
+
         if category is not None:
             output_category = category
-            amount = float(text)
+            amount = float(dto.text)
         else:
             amount: float = self.text_processing.number_searcher(text)
             main_lemma: str = self.text_processing.main_noun_searcher(text)[0]
@@ -42,7 +45,6 @@ class AddExpenseUseCase:
 
             if not output_category:
                 output_category, prob = self.model.predict(main_lemma)
-       
 
         new_transaction = Transaction(
             category=output_category,
