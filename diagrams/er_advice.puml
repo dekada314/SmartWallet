@@ -2,35 +2,35 @@
 skinparam defaultFontName Arial
 skinparam backgroundColor white
 
-title ER-диаграмма базы знаний советов «Умный кошелёк»
+title ER-диграмма базы знаний советов «Умный кошелёк»
 
 entity "Advice\n(Совет)" as ADV {
-  * id : string <<PK>>
+  * идентификатор : string <<PK>>
   --
-  * name : string
-  * description : text
-  * category : string <<FK>>
+  * название : string
+  * описание : text
+  * категория : string <<FK>>
 }
 
 entity "AdviceCategory\n(Тип категории)" as ACAT {
-  * category_id : string <<PK>>
+  * идентификатор_категории : string <<PK>>
   --
-  * type : enum {categorical, common}
+  * тип : enum {categorical, common}
 }
 
 entity "Transaction\n(Транзакция)" as TX {
-  * id : uuid <<PK>>
+  * идентификатор : uuid <<PK>>
   --
-  * category : string <<FK>>
-  * amount : float
-  * created_at : datetime
+  * категория : string <<FK>>
+  * сумма : float
+  * дата_создания : datetime
 }
 
 entity "User\n(Пользователь)" as USR {
-  * user_id : integer <<PK>>
+  * идентификатор_пользователя : integer <<PK>>
   --
-  * balance : float
-  * last_action : datetime
+  * баланс : float
+  * последнее_действие : datetime
 }
 
 entity "GiveAdviceUseCase\n(Решатель советов)" as GA {
@@ -39,10 +39,10 @@ entity "GiveAdviceUseCase\n(Решатель советов)" as GA {
   * результат : advice.description
 }
 
-ACAT ||--o{ ADV  : "категория содержит советы"
-ADV  }o--|| GA   : "выбирается решателем"
-TX   }o--|| GA   : "передаёт категорию"
-TX   }o--|| USR  : "принадлежит"
-GA   --> USR     : "отправляет совет"
+ACAT ||--o{ ADV
+ADV }o--|| GA
+TX }o--|| GA
+TX }o--|| USR
+GA --> USR
 
 @enduml

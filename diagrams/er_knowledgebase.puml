@@ -5,43 +5,43 @@ skinparam backgroundColor white
 title ER-диаграмма основной базы знаний «Умный кошелёк»
 
 entity "Category\n(Категория)" as CAT {
-  * id : string <<PK>>
+  * идентификатор : string <<PK>>
   --
-  * name : string
-  * is_essential : boolean
-  * priority : integer [1..5]
-  parent : string <<FK>>
+  * название : string
+  * обязательная : boolean
+  * приоритет : integer [1..5]
+  родитель : string <<FK>>
 }
 
 entity "Keyword\n(Ключевое слово)" as KW {
-  * word : string <<PK>>
+  * слово : string <<PK>>
   --
-  * category_id : string <<FK>>
+  * идентификатор_категории : string <<FK>>
 }
 
 entity "Rule\n(Правило)" as RULE {
-  * id : string <<PK>>
+  * идентификатор : string <<PK>>
   --
-  * condition : string
-  * text : string
+  * условие : string
+  * текст : string
 }
 
 entity "TrainingExample\n(Обучающий пример)" as TR {
-  * text : string <<PK>>
+  * текст : string <<PK>>
   --
-  * category_id : string <<FK>>
+  * идентификатор_категории : string <<FK>>
 }
 
 entity "MLModel\n(ML-модель)" as ML {
-  * model_path : string <<PK>>
+  * путь_к_модели : string <<PK>>
   --
-  * vectorizer_path : string
+  * путь_к_векторизатору : string
 }
 
-CAT ||--o{ CAT       : "parent (is-a)"
-CAT ||--o{ KW        : "имеет ключевые слова"
-CAT ||--o{ RULE      : "участвует в условии"
-CAT ||--o{ TR        : "размечает примеры"
-TR  }o--|| ML        : "обучает"
+CAT ||--o{ CAT
+CAT ||--o{ KW
+CAT ||--o{ RULE
+CAT ||--o{ TR
+TR }o--|| ML
 
 @enduml
