@@ -11,25 +11,29 @@ class Keyboards:
     def get_all_func_buttons() -> ReplyKeyboardMarkup:
         return ReplyKeyboardMarkup(
             keyboard=[
-                [KeyboardButton(text="Твоя статистика")],
+                [KeyboardButton(text="Статистика")],
                 [
                     KeyboardButton(text="Ввести расход"),
                     KeyboardButton(text="Ввести доход"),
                 ],
-                [KeyboardButton(text="Цели"), KeyboardButton(text="Аналитика")],
-                [KeyboardButton(text="Получить совет")],
+                [KeyboardButton(text="Цели"), KeyboardButton(text="Получить совет")],
             ],
             resize_keyboard=True,
         )
 
     @staticmethod
-    def get_all_analytics_buttons() -> ReplyKeyboardMarkup:
-        return ReplyKeyboardMarkup(
-            keyboard=[
-                [KeyboardButton(text="За день"), KeyboardButton(text="За неделю")],
-                [KeyboardButton(text="За месяц"), KeyboardButton(text="За год")],
+    def get_all_statistics_buttons() -> InlineKeyboardButton:
+        return InlineKeyboardButton(
+            inline_keyboard=[
+                [
+                    InlineKeyboardButton(text="За день", callback_data="per_day"),
+                    InlineKeyboardButton(text="За неделю", callback_data="per_week"),
+                ],
+                [
+                    InlineKeyboardButton(text="За месяц", callback_data="per_month"),
+                    InlineKeyboardButton(text="За год", callback_data="per_year"),
+                ],
             ],
-            resize_keyboard=True,
         )
 
     @staticmethod

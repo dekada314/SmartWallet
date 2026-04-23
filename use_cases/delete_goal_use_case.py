@@ -1,7 +1,7 @@
 from aiogram.types import CallbackQuery, Message
 
 from domain.entities.goal import Goal
-from handlers.del_goal_request import DelGoalRequest
+from handlers.requests.del_goal_request import DelGoalRequest
 from repository.base_goals_repository import BaseGoalsRepository
 
 

@@ -9,9 +9,12 @@ class BaseTransactionRepository(ABC):
 
     @abstractmethod
     async def get_user_transactions_count() -> int: ...
-    
+
     @abstractmethod
     async def get_last_id() -> int: ...
+
+    @abstractmethod
+    async def get_transactions_by_period() -> int: ...
 
     # @abstractmethod
     # async def delete_transaction() -> None: ...

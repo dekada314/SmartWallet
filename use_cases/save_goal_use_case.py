@@ -2,7 +2,7 @@ from aiogram.types import Message
 
 from domain.entities.goal import Goal
 from domain.entities.user import User
-from handlers.save_goal_request import SaveGoalRequest
+from handlers.requests.save_goal_request import SaveGoalRequest
 from repository.base_goals_repository import BaseGoalsRepository
 
 

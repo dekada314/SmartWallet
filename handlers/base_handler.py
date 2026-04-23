@@ -1,7 +1,7 @@
 from aiogram import Router, types
 from aiogram.filters import Command
-from handlers.user_registry_request import UserRegistryRequest
 
+from handlers.requests.user_registry_request import UserRegistryRequest
 from keyboards import Keyboards
 from use_cases.user_register_use_case import UserRegisterUseCase
 

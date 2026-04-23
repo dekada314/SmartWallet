@@ -4,8 +4,8 @@ from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import CallbackQuery
 
 from domain.entities.goal import Goal
-from handlers.del_goal_request import DelGoalRequest
-from handlers.save_goal_request import SaveGoalRequest
+from handlers.requests.del_goal_request import DelGoalRequest
+from handlers.requests.save_goal_request import SaveGoalRequest
 from keyboards import Keyboards
 from use_cases.change_goal_desc_use_case import ChangeGoalDescUseCase
 from use_cases.delete_goal_use_case import DeleteGoalUseCase
@@ -100,8 +100,10 @@ class GoalHandler:
         async def handle_delete_goal(callback: CallbackQuery):
             await callback.answer()
             user_goal_id = int(callback.data.split("del_goal_")[1])
-            
-            del_goal_request = DelGoalRequest(user_id=callback.from_user.id, user_goal_id=user_goal_id)
+
+            del_goal_request = DelGoalRequest(
+                user_id=callback.from_user.id, user_goal_id=user_goal_id
+            )
 
             goal = await self.delete_goal_us.execute(del_goal_request)
 

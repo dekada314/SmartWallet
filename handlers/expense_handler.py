@@ -10,9 +10,9 @@ from aiogram.types import (
 )
 from aiogram.utils.markdown import hbold, hcode, hitalic, hlink
 from pydantic import ValidationError
-from handlers.save_transaction_request import SaveTransactionRequest
 
 from domain.entities.transaction import Transaction
+from handlers.requests.save_transaction_request import SaveTransactionRequest
 from keyboards import Keyboards
 from services.get_categories import GetCategories
 from services.receipt_parser import ReceiptParser
