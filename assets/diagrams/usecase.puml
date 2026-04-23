@@ -18,13 +18,13 @@ rectangle "Интеллектуальная система «Умный коше
         usecase "Ввести доход" as UC3
     }
 
-    rectangle "Классификация\n(Основная БЗ)" #LightBlue {
+    rectangle "Классификация\n(Основная БЗ)"  {
         usecase "Найти категорию\nпо лексикону" as UC4
         usecase "Классифицировать\nчерез ML-модель" as UC5
         usecase "Применить\nпродукционное правило" as UC6
     }
 
-    rectangle "Рекомендации\n(БЗ советов)" #LightGreen {
+    rectangle "Рекомендации\n(БЗ советов)"  {
         usecase "Получить совет\nпо категории" as UC7
         usecase "Получить плановое\nуведомление с советом" as UC8
         usecase "Запросить совет\nвручную" as UC9
@@ -65,16 +65,5 @@ Dev --> UC13
 Dev --> UC14
 Dev --> UC15
 
-note right of UC4
-  Основная БЗ:
-  knowledge_base.yml
-  (онтология + лексикон)
-end note
-
-note right of UC7
-  БЗ советов:
-  advices.yml
-  (рекомендации по категориям)
-end note
 
 @enduml
