@@ -1,3 +1,5 @@
+from dataclasses import astuple
+
 import aiosqlite
 
 from domain.entities.goal import Goal
@@ -37,13 +39,7 @@ class SqliteGoalsRepository(BaseGoalsRepository):
         async with aiosqlite.connect(self.db_path) as db:
             await db.execute(
                 "INSERT INTO goals(user_id, user_goal_id, target, curr_bill, text) VALUES(?, ?, ?, ?, ?)",
-                (
-                    goal.user_id,
-                    goal.user_goal_id,
-                    goal.target,
-                    goal.curr_bill,
-                    goal.text,
-                ),
+                astuple(goal),
             )
             await db.commit()
 
@@ -66,13 +62,7 @@ class SqliteGoalsRepository(BaseGoalsRepository):
             )
             row = await cursor.fetchone()
 
-            goal = Goal(
-                row["user_id"],
-                row["user_goal_id"],
-                row["target"],
-                row["curr_bill"],
-                row["text"],
-            )
+            goal = Goal(**row)
             return goal  # noqa
 
     async def update_goal(self, goal: Goal) -> None:

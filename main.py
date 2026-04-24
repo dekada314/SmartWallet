@@ -6,11 +6,12 @@ from aiogram import Bot, Dispatcher
 from dotenv import load_dotenv
 
 import config
-from handlers.advice_handler import AdviceHandler
-from handlers.base_handler import BaseHandler
-from handlers.expense_handler import ExpenseHandler
-from handlers.goal_handler import GoalHandler
-from handlers.income_handler import IncomeHandler
+from app.bot.handlers.advice_handler import AdviceHandler
+from app.bot.handlers.base_handler import BaseHandler
+from app.bot.handlers.expense_handler import ExpenseHandler
+from app.bot.handlers.goal_handler import GoalHandler
+from app.bot.handlers.income_handler import IncomeHandler
+from app.bot.handlers.statistics_handler import StatisticsHandler
 from infrastructure.sqlite_goals_repository import SqliteGoalsRepository
 from infrastructure.sqlite_transaction_repository import SQLiteTransactionRepository
 from infrastructure.sqlite_user_repository import SQLiteUserRepository
@@ -19,6 +20,7 @@ from model.model import SkClassifier
 from services.get_categories import GetCategories
 from services.receipt_parser import ReceiptParser
 from services.sheduler import APSCheduler
+from services.text_processing import TextProcessing
 from use_cases.add_expense_user_case import AddExpenseUseCase
 from use_cases.add_income_use_case import AddIncomeUseCase
 from use_cases.change_goal_desc_use_case import ChangeGoalDescUseCase
@@ -29,6 +31,7 @@ from use_cases.give_advice_use_case import GiveAdviceUseCase
 from use_cases.save_goal_use_case import SaveGoalUseCase
 from use_cases.update_goal_use_case import UpdateGoalUseCase
 from use_cases.user_register_use_case import UserRegisterUseCase
+from use_cases.get_statistics_use_case import GetStatiscticsPerPeriod
 
 load_dotenv()
 
@@ -45,8 +48,13 @@ async def main():
     ml_model = SkClassifier(
         config.DATASET_PATH, config.VECTORIZER_PATH, config.MODEL_PATH
     )
+    text_processing = TextProcessing(
+        cat_examples=categories_kb.get_all_categories_examples()
+    )
 
-    add_expense_us = AddExpenseUseCase(transaction_db, categories_kb, user_db, ml_model)
+    add_expense_us = AddExpenseUseCase(
+        transaction_db, categories_kb, user_db, text_processing, ml_model
+    )
     register_us = UserRegisterUseCase(user_db)
     change_goal_us = ChangeGoalDescUseCase(goal_db)
     delete_goal_us = DeleteGoalUseCase(goal_db)
@@ -54,10 +62,11 @@ async def main():
     display_goals_us = DisplayUserGoals(goal_db)
     update_goal_us = UpdateGoalUseCase(goal_db)
     exceeding_limits_us = ExceedingTheLimitUseCase(goal_db)
-    add_income_us = AddIncomeUseCase(user_db)
+    add_income_us = AddIncomeUseCase(user_db, transaction_db)
     give_advice_us = GiveAdviceUseCase(config.YAML_ADVICES)
     get_categories = GetCategories(categories_kb)
     receipt_parser = ReceiptParser(categories_kb)
+    statistics_us = GetStatiscticsPerPeriod(transaction_db)
 
     base_handler = BaseHandler(register_us)
     base_handler.register()
@@ -76,6 +85,8 @@ async def main():
     income_handler.register()
     advice_handler = AdviceHandler(give_advice_us)
     advice_handler.register()
+    statistics_handler = StatisticsHandler(statistics_us)
+    statistics_handler.register()
 
     bot = Bot(os.getenv("TOKEN"))
     dp = Dispatcher()
@@ -88,6 +99,7 @@ async def main():
     dp.include_router(goal_handler.router)
     dp.include_router(income_handler.router)
     dp.include_router(advice_handler.router)
+    dp.include_router(statistics_handler.router)
 
     await bot.delete_webhook(drop_pending_updates=True)
     await dp.start_polling(bot)

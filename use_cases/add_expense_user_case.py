@@ -1,9 +1,6 @@
-from datetime import date, datetime
-from uuid import UUID, uuid4
-
+from app.requests.save_transaction_request import SaveTransactionRequest
 from domain.entities.transaction import Transaction
-from domain.entities.user import User
-from handlers.requests.save_transaction_request import SaveTransactionRequest
+from domain.enums import TransactionType
 from model.basic_classifier import BasicClassifier
 from repository.base_categories_repository import BaseCategoriesRepositry
 from repository.base_transaction_repository import BaseTransactionRepository
@@ -17,38 +14,38 @@ class AddExpenseUseCase:
         transaction_repository: BaseTransactionRepository,
         categories_repository: BaseCategoriesRepositry,
         user_repository: BaseUserRepository,
+        text_processing_unit: TextProcessing,
         classifier: BasicClassifier,
     ):
         self.transaction_repositry = transaction_repository
         self.categories_repository = categories_repository
         self.user_repository = user_repository
+        self.text_processing = text_processing_unit
         self.model = classifier
 
     async def execute(
         self, dto: SaveTransactionRequest, category: str = None
     ) -> Transaction | None:
-        if not dto.owner_id or not dto.text:
-            raise ValueError
-
-        cat_examples = self.categories_repository.get_categiries_examples()
-
-        self.text_processing = TextProcessing(cat_examples=cat_examples)
-
         if category is not None:
             output_category = category
             amount = float(dto.text)
+            source_text = None
         else:
             amount: float = self.text_processing.extract_amount(dto.text)
             cat, conf = self.text_processing.classifier(dto.text)
-            if conf > 0.7:
-                output_category = cat
+            # if conf > 0.7:
+            output_category = cat
+            source_text = dto.text
+
+        last_user_id = await self.transaction_repositry.get_last_id(dto.owner_id)
 
         new_transaction = Transaction(
             user_id=dto.owner_id,
-            user_transaction_id=self.transaction_repositry.get_last_id(dto.owner_id)
-            + 1,
+            user_transaction_id=last_user_id + 1,
             category=output_category,
             amount=amount,
+            source_text=source_text,
+            transaction_type=TransactionType.EXPENSE,
         )
 
         await self.transaction_repositry.save_transaction(new_transaction)

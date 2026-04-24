@@ -4,8 +4,8 @@ from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import CallbackQuery
 
 from domain.entities.goal import Goal
-from handlers.requests.del_goal_request import DelGoalRequest
-from handlers.requests.save_goal_request import SaveGoalRequest
+from app.requests.del_goal_request import DelGoalRequest
+from app.requests.save_goal_request import SaveGoalRequest
 from keyboards import Keyboards
 from use_cases.change_goal_desc_use_case import ChangeGoalDescUseCase
 from use_cases.delete_goal_use_case import DeleteGoalUseCase

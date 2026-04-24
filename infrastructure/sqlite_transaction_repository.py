@@ -1,3 +1,4 @@
+from dataclasses import astuple
 from datetime import datetime
 
 import aiosqlite
@@ -17,11 +18,11 @@ class SQLiteTransactionRepository(BaseTransactionRepository):
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     user_id INTEGER NOT NULL,
                     user_transaction_id INTEGER NOT NULL,
-                    category TEXT NOT NULL,
+                    category TEXT,
                     amount REAL NOT NULL,
+                    source_text TEXT,
                     transaction_type TEXT NOT NULL,
-                    source_text TEXT NOT NULL
-                    created_at DATE,
+                    created_at DATE
             ) 
         """)
 
@@ -34,22 +35,18 @@ class SQLiteTransactionRepository(BaseTransactionRepository):
                 "SELECT MAX(user_transaction_id) AS last_id FROM transactions WHERE user_id = ?",
                 (user_id,),
             )
-            row = await cursor.fetchone()[0]
-            return row["last_id"] if row["last_id"] else 0
+            row = await cursor.fetchone()
+            return row[0] if row[0] else 0
 
     async def save_transaction(self, transaction: Transaction) -> None:
+        values = astuple(transaction)[:-2] + (
+            transaction.transaction_type.value,
+            transaction.created_at.strftime("%Y-%m-%d %H:%M:%S"),
+        )
         async with aiosqlite.connect(self.db_path) as db:
             await db.execute(
-                "INSERT OR REPLACE INTO transactions(user_id, user_transaction_id, category, amount, created_at) VALUES(?, ?, ?, ?, ?)",
-                (
-                    transaction.user_id,
-                    transaction.user_transaction_id,
-                    transaction.category,
-                    transaction.amount,
-                    transaction.transaction_type,
-                    transaction.source_text,
-                    transaction.created_at.strftime("%Y-%m-%d %H:%M:%S"),
-                ),
+                "INSERT OR REPLACE INTO transactions(user_id, user_transaction_id, category, amount, source_text, transaction_type,  created_at) VALUES(?, ?, ?, ?, ?, ?, ?)",
+                values,
             )
             await db.commit()
 
@@ -96,7 +93,9 @@ class SQLiteTransactionRepository(BaseTransactionRepository):
                 (user_id, start_date, end_date),
             )
             transactions = []
+
             async for row in cursor:
-                row = dict(row).pop("id", None)
+                row = dict(row)
+                row.pop("id", None)
                 transactions.append(Transaction(**row))
             return transactions

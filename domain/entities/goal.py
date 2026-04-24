@@ -15,14 +15,14 @@ class Goal:
         if self.target < 0 or self.curr_bill < 0:
             raise ValueError("Значение вклада не может быть отрицательным")
 
-    def add_amount(self, value):
+    def add_amount(self, value) -> None:
         self.curr_bill += value
         if self.is_achieved():
             return self.curr_bill - self.target
         return None
 
-    def is_achieved(self):
+    def is_achieved(self) -> bool:
         return self.curr_bill >= self.target
 
-    def get_progress(self):
+    def get_progress(self) -> str:
         return f"{self.curr_bill / self.target:.1}%"

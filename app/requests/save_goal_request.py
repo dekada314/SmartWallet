@@ -5,7 +5,7 @@ from pydantic import BaseModel, Field, field_validator
 
 class SaveGoalRequest(BaseModel):
     user_id: int = Field(gt=0)
-    amount: Decimal
+    amount: float
     text: str
 
     @field_validator("amount", mode="before")

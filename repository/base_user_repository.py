@@ -16,6 +16,7 @@ class BaseUserRepository(ABC):
     @abstractmethod
     async def update_last_action() -> None: ...
     @abstractmethod
+    
     async def update_balance() -> None: ...
 
     # @abstractmethod

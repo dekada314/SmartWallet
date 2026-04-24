@@ -3,4 +3,4 @@ class GettingUserError(Exception):
 
 
 class NotValidAmountError(Exception):
-    """Введенное значение совсем не похоже на число"""
+    """Введенное значение нельзя интерпретировать как число"""

@@ -22,8 +22,8 @@ class Keyboards:
         )
 
     @staticmethod
-    def get_all_statistics_buttons() -> InlineKeyboardButton:
-        return InlineKeyboardButton(
+    def get_all_statistics_buttons() -> InlineKeyboardMarkup:
+        return InlineKeyboardMarkup(
             inline_keyboard=[
                 [
                     InlineKeyboardButton(text="За день", callback_data="per_day"),

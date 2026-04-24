@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 
 from domain.entities.transaction import Transaction, TransactionType
-from handlers.requests.statistics_request import StatisticsRequest
+from app.requests.get_statistics_request import StatisticsRequest
 from repository.base_transaction_repository import BaseTransactionRepository
 from use_cases.enums import PeriodType
 from use_cases.statistics_reponse import StatisticsResponse
@@ -30,27 +30,34 @@ class GetStatiscticsPerPeriod:
             case _:
                 raise ValueError
 
-        transactions = await self.transaction_repo.get_transactions_by_period(
+        transactions: list[
+            Transaction
+        ] = await self.transaction_repo.get_transactions_by_period(
             statistics_dto.user_id, start_date, now
         )
-
-        income_transactions = filter(
-            lambda transaction: transaction.transaction_type == TransactionType.INCOME,
-            transactions,
-        )
-        income_balance = sum(income_transactions)
-
-        expense_balance = sum(
+        print(transactions)
+        income_transactions = list(
             filter(
                 lambda transaction: transaction.transaction_type
-                == TransactionType.EXPENSE,
+                == TransactionType.INCOME.value,
                 transactions,
             )
         )
+        income_balance = sum([tr.amount for tr in income_transactions])
+
+        expense_transactions = list(
+            filter(
+                lambda transaction: transaction.transaction_type
+                == TransactionType.EXPENSE.value,
+                transactions,
+            )
+        )
+
+        expense_balance = sum([tr.amount for tr in expense_transactions])
 
         return StatisticsResponse(
             income_balance=income_balance,
             income_count=len(income_transactions),
             expense_balance=expense_balance,
-            expense_count=len(transactions) - len(income_transactions),
+            expense_count=len(expense_transactions),
         )

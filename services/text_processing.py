@@ -10,7 +10,7 @@ class TextProcessing:
         self.morph = pymorphy3.MorphAnalyzer()
         self.model = SentenceTransformer("paraphrase-multilingual-MiniLM-L12-v2")
         self._cat_embeddings = {}
-        self._calc_embeddings()
+        self._calc_embeddings(category_examples=cat_examples)
 
     def _calc_embeddings(self, category_examples: dict):
         for cat, examples in category_examples.items():
@@ -56,19 +56,8 @@ class TextProcessing:
             number_pattern,
         ]
         for pattern in patterns:
-            match = re.search(pattern=pattern, text=input_text)
+            match = re.search(pattern=pattern, string=input_text)
             if match:
                 return float(match.group(1).replace(",", "."))
 
-        return None
-
-    def keyword_search(self, text, lexicon):
-
-    def classify_transaction(self, text: str):
-        amount = self.extract_amount(text)
-
-        cat, conf = self.classifier(text)
-
-        if conf > 0.6:
-            return cat, conf
         return None

@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from domain.entities.user import User
-from handlers.requests.user_registry_request import UserRegistryRequest
+from app.requests.user_registry_request import UserRegistryRequest
 from repository.base_user_repository import BaseUserRepository
 
 

@@ -1,6 +1,4 @@
-from aiogram import Bot, F, Router, types
-from aiogram.enums import ContentType
-from aiogram.filters import Command
+from aiogram import F, Router, types
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import (
@@ -8,11 +6,10 @@ from aiogram.types import (
     KeyboardButton,
     ReplyKeyboardMarkup,
 )
-from aiogram.utils.markdown import hbold, hcode, hitalic, hlink
 from pydantic import ValidationError
 
+from app.requests.save_transaction_request import SaveTransactionRequest
 from domain.entities.transaction import Transaction
-from handlers.requests.save_transaction_request import SaveTransactionRequest
 from keyboards import Keyboards
 from services.get_categories import GetCategories
 from services.receipt_parser import ReceiptParser
@@ -158,7 +155,7 @@ class ExpenseHandler:
         #         await message.answer(f"Произошла ошибка при чтении: {e}")
 
         @self.router.message(ExpenseForm.waiting_for_doc, F.document)
-        async def handle_enter_by_file(message: types.Message, state: FSMContext):
+        async def handle_enter_by_file(message: types.Message):
             document = message.document
             file = await message.bot.get_file(document.file_id)
             file_ext = (

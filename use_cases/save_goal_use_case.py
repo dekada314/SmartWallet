@@ -2,7 +2,7 @@ from aiogram.types import Message
 
 from domain.entities.goal import Goal
 from domain.entities.user import User
-from handlers.requests.save_goal_request import SaveGoalRequest
+from app.requests.save_goal_request import SaveGoalRequest
 from repository.base_goals_repository import BaseGoalsRepository
 
 
@@ -15,8 +15,7 @@ class SaveGoalUseCase:
         last_user_goal_id = await self.goal_repository.get_last_id(user_id)
         try:
             new_goal = Goal(user_id, last_user_goal_id + 1, dto.amount, 0, dto.text)
-
             await self.goal_repository.save_goal(new_goal)
             return new_goal
-        except Exception:
-            return None
+        except Exception as e:
+            print(f'{e}')

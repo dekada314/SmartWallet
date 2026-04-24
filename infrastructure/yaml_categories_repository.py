@@ -12,6 +12,10 @@ class YamlCategoriesRepository(BaseCategoriesRepositry):
         with open(self.kb, "r", encoding="utf-8") as file:
             return yaml.safe_load(file)["ontology"]["categories"]
 
+    def get_all_categories_examples(self) -> dict[str : list[str]]:
+        with open(self.kb, "r", encoding="utf-8") as file:
+            return yaml.safe_load(file)["category_examples"]
+
     def get_categiries_examples(self):
         with open(self.kb, "r", encoding="utf-8") as file:
             return yaml.safe_load(file)["category_examples"]
