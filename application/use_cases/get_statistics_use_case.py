@@ -35,7 +35,6 @@ class GetStatiscticsPerPeriod:
         ] = await self.transaction_repo.get_transactions_by_period(
             statistics_dto.user_id, start_date, now
         )
-        print(transactions)
         income_transactions = list(
             filter(
                 lambda transaction: transaction.transaction_type
