@@ -1,4 +1,4 @@
-from repository.base_goals_repository import BaseGoalsRepository
+from domain.repositories.base_goals_repository import BaseGoalsRepository
 
 
 class DisplayUserGoals:

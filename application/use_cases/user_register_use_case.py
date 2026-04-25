@@ -1,9 +1,8 @@
 from datetime import datetime
 
-from repository.base_user_repository import BaseUserRepository
-
 from app.dto.requests.user_registry_request import UserRegistryRequest
 from domain.entities.user import User
+from domain.repositories.base_user_repository import BaseUserRepository
 
 
 class UserRegisterUseCase:

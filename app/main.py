@@ -4,15 +4,6 @@ import sqlite3
 
 from aiogram import Bot, Dispatcher
 from dotenv import load_dotenv
-from infrastructure.database.sqlite.sqlite_goals_repository import SqliteGoalsRepository
-from infrastructure.database.sqlite.sqlite_transaction_repository import (
-    SQLiteTransactionRepository,
-)
-from infrastructure.database.sqlite.sqlite_user_repository import SQLiteUserRepository
-from model.model import SkClassifier
-from services.get_categories import GetCategories
-from services.receipt_parser import ReceiptParser
-from services.sheduler import APSCheduler
 
 import app.config.settings as settings
 from app.bot.handlers.advice_handler import AdviceHandler
@@ -32,9 +23,22 @@ from application.use_cases.give_advice_use_case import GiveAdviceUseCase
 from application.use_cases.save_goal_use_case import SaveGoalUseCase
 from application.use_cases.update_goal_use_case import UpdateGoalUseCase
 from application.use_cases.user_register_use_case import UserRegisterUseCase
+from infrastructure.database.implementations.sqlite_goals_repository import (
+    SqliteGoalsRepository,
+)
+from infrastructure.database.implementations.sqlite_transaction_repository import (
+    SQLiteTransactionRepository,
+)
+from infrastructure.database.implementations.sqlite_user_repository import (
+    SQLiteUserRepository,
+)
+from infrastructure.external_services.get_categories import GetCategories
+from infrastructure.external_services.receipt_parser import ReceiptParser
+from infrastructure.external_services.sheduler import APSCheduler
 from infrastructure.knowledge_base.implementations.yaml_categories_repository import (
     YamlCategoriesRepository,
 )
+from infrastructure.ml.classifier.model import SkClassifier
 from infrastructure.ml.embeddings.text_processing import TextProcessing
 
 load_dotenv()

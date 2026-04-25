@@ -1,7 +1,7 @@
 import yaml
-from repository.base_categories_repository import BaseCategoriesRepositry
 
 import app.config.settings as settings
+from domain.repositories.base_categories_repository import BaseCategoriesRepositry
 
 
 class YamlCategoriesRepository(BaseCategoriesRepositry):

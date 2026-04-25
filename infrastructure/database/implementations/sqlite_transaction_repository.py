@@ -2,9 +2,9 @@ from dataclasses import astuple
 from datetime import datetime
 
 import aiosqlite
-from repository.base_transaction_repository import BaseTransactionRepository
 
 from domain.entities.transaction import Transaction
+from domain.repositories.base_transaction_repository import BaseTransactionRepository
 
 
 class SQLiteTransactionRepository(BaseTransactionRepository):

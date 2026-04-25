@@ -1,7 +1,7 @@
 from aiogram.types import Message
-from repository.base_goals_repository import BaseGoalsRepository
 
 from domain.entities.goal import Goal
+from domain.repositories.base_goals_repository import BaseGoalsRepository
 
 
 class UpdateGoalUseCase:

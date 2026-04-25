@@ -1,11 +1,10 @@
-from model.basic_classifier import BasicClassifier
-from repository.base_categories_repository import BaseCategoriesRepositry
-from repository.base_transaction_repository import BaseTransactionRepository
-from repository.base_user_repository import BaseUserRepository
-
 from app.dto.requests.save_transaction_request import SaveTransactionRequest
 from domain.entities.transaction import Transaction
 from domain.enums.transaction_type import TransactionType
+from domain.repositories.base_categories_repository import BaseCategoriesRepositry
+from domain.repositories.base_transaction_repository import BaseTransactionRepository
+from domain.repositories.base_user_repository import BaseUserRepository
+from infrastructure.ml.classifier.basic_classifier import BasicClassifier
 from infrastructure.ml.embeddings.text_processing import TextProcessing
 
 

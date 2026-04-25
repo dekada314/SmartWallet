@@ -1,9 +1,9 @@
 from aiogram.types import Message
-from repository.base_goals_repository import BaseGoalsRepository
 
 from app.dto.requests.save_goal_request import SaveGoalRequest
 from domain.entities.goal import Goal
 from domain.entities.user import User
+from domain.repositories.base_goals_repository import BaseGoalsRepository
 
 
 class SaveGoalUseCase:

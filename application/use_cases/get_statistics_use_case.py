@@ -1,11 +1,10 @@
 from datetime import datetime, timedelta
 
-from repository.base_transaction_repository import BaseTransactionRepository
-
 from app.dto.requests.get_statistics_request import StatisticsRequest
 from app.dto.responses.statistics_reponse import StatisticsResponse
 from application.use_cases.enums import PeriodType
 from domain.entities.transaction import Transaction, TransactionType
+from domain.repositories.base_transaction_repository import BaseTransactionRepository
 
 
 class GetStatiscticsPerPeriod:

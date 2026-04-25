@@ -1,8 +1,8 @@
 from aiogram.types import CallbackQuery, Message
-from repository.base_goals_repository import BaseGoalsRepository
 
 from app.dto.requests.del_goal_request import DelGoalRequest
 from domain.entities.goal import Goal
+from domain.repositories.base_goals_repository import BaseGoalsRepository
 
 
 class DeleteGoalUseCase:

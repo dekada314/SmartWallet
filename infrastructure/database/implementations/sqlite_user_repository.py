@@ -1,9 +1,9 @@
 from datetime import datetime
 
 import aiosqlite
-from repository.base_user_repository import BaseUserRepository
 
 from domain.entities.user import User
+from domain.repositories.base_user_repository import BaseUserRepository
 
 
 class SQLiteUserRepository(BaseUserRepository):

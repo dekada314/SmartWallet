@@ -1,9 +1,9 @@
 from dataclasses import astuple
 
 import aiosqlite
-from repository.base_goals_repository import BaseGoalsRepository
 
 from domain.entities.goal import Goal
+from domain.repositories.base_goals_repository import BaseGoalsRepository
 
 
 class SqliteGoalsRepository(BaseGoalsRepository):

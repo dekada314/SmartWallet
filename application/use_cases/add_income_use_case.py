@@ -1,10 +1,9 @@
-from repository.base_transaction_repository import BaseTransactionRepository
-from repository.base_user_repository import BaseUserRepository
-
 from app.dto.requests.save_income_request import SaveIncomeRequest
 from domain.entities.transaction import Transaction
 from domain.entities.user import User
 from domain.enums.transaction_type import TransactionType
+from domain.repositories.base_transaction_repository import BaseTransactionRepository
+from domain.repositories.base_user_repository import BaseUserRepository
 
 from ..exceptions.exceptions import GettingUserError
 

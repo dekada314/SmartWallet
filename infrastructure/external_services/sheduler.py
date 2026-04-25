@@ -2,7 +2,8 @@ from datetime import datetime
 
 from aiogram import Bot, Dispatcher
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from repository.base_goals_repository import BaseGoalsRepository
+
+from domain.repositories.base_goals_repository import BaseGoalsRepository
 
 
 class APSCheduler:

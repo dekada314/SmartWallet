@@ -1,4 +1,4 @@
-from repository.base_categories_repository import BaseCategoriesRepositry
+from domain.repositories.base_categories_repository import BaseCategoriesRepositry
 
 
 class GetCategories:
