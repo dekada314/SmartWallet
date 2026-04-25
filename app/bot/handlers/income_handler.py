@@ -3,9 +3,9 @@ from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from pydantic import ValidationError
 
-from app.requests.save_income_request import SaveIncomeRequest
-from use_cases.add_income_use_case import AddIncomeUseCase
-from use_cases.exceptions import GettingUserError
+from app.dto.requests.save_income_request import SaveIncomeRequest
+from application.exceptions.exceptions import GettingUserError
+from application.use_cases.add_income_use_case import AddIncomeUseCase
 
 
 class IncomeForm(StatesGroup):
@@ -26,7 +26,9 @@ class IncomeHandler:
         @self.router.message(IncomeForm.waiting_for_earning)
         async def handle_income_expression(message: types.Message):
             try:
-                income_dto = SaveIncomeRequest(user_id=message.from_user.id, amount=message.text)
+                income_dto = SaveIncomeRequest(
+                    user_id=message.from_user.id, amount=message.text
+                )
                 new_balance = await self.add_income_us.execute(income_dto=income_dto)
                 if new_balance:
                     await message.answer(

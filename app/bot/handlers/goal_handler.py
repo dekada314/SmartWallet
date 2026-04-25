@@ -3,16 +3,16 @@ from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import CallbackQuery
 
+from app.bot.keyboards.keyboards import Keyboards
+from app.dto.requests.del_goal_request import DelGoalRequest
+from app.dto.requests.save_goal_request import SaveGoalRequest
+from application.use_cases.change_goal_desc_use_case import ChangeGoalDescUseCase
+from application.use_cases.delete_goal_use_case import DeleteGoalUseCase
+from application.use_cases.display_user_goals_use_case import DisplayUserGoals
+from application.use_cases.exceeding_the_limit_use_case import ExceedingTheLimitUseCase
+from application.use_cases.save_goal_use_case import SaveGoalUseCase
+from application.use_cases.update_goal_use_case import UpdateGoalUseCase
 from domain.entities.goal import Goal
-from app.requests.del_goal_request import DelGoalRequest
-from app.requests.save_goal_request import SaveGoalRequest
-from keyboards import Keyboards
-from use_cases.change_goal_desc_use_case import ChangeGoalDescUseCase
-from use_cases.delete_goal_use_case import DeleteGoalUseCase
-from use_cases.display_user_goals_use_case import DisplayUserGoals
-from use_cases.exceeding_the_limit_use_case import ExceedingTheLimitUseCase
-from use_cases.save_goal_use_case import SaveGoalUseCase
-from use_cases.update_goal_use_case import UpdateGoalUseCase
 
 
 class GoalForm(StatesGroup):

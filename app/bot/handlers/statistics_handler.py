@@ -1,11 +1,11 @@
 from aiogram import F, Router, types
 from aiogram.filters import Command
 
-from app.requests.get_statistics_request import StatisticsRequest
-from keyboards import Keyboards
-from use_cases.enums import PeriodType
-from use_cases.get_statistics_use_case import GetStatiscticsPerPeriod
-from use_cases.statistics_reponse import StatisticsResponse
+from app.bot.keyboards.keyboards import Keyboards
+from app.dto.requests.get_statistics_request import StatisticsRequest
+from app.dto.responses.statistics_reponse import StatisticsResponse
+from application.use_cases.enums import PeriodType
+from application.use_cases.get_statistics_use_case import GetStatiscticsPerPeriod
 
 callback_to_period = {
     "per_day": PeriodType.DAY,

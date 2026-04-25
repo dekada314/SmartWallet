@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from datetime import date, datetime
 
-from domain.enums import TransactionType
+from domain.enums.transaction_type import TransactionType
 
 
 @dataclass(slots=True)

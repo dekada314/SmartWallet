@@ -1,6 +1,6 @@
 from aiogram import Router, types
 
-from use_cases.give_advice_use_case import GiveAdviceUseCase
+from application.use_cases.give_advice_use_case import GiveAdviceUseCase
 
 
 class AdviceHandler:

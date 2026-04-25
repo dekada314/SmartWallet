@@ -7,13 +7,13 @@ from aiogram.types import (
     ReplyKeyboardMarkup,
 )
 from pydantic import ValidationError
-
-from app.requests.save_transaction_request import SaveTransactionRequest
-from domain.entities.transaction import Transaction
-from keyboards import Keyboards
 from services.get_categories import GetCategories
 from services.receipt_parser import ReceiptParser
-from use_cases.add_expense_user_case import AddExpenseUseCase
+
+from app.bot.keyboards.keyboards import Keyboards
+from app.dto.requests.save_transaction_request import SaveTransactionRequest
+from application.use_cases.add_expense_user_case import AddExpenseUseCase
+from domain.entities.transaction import Transaction
 
 
 class ExpenseForm(StatesGroup):
