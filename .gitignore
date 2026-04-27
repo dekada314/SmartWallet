@@ -20,3 +20,4 @@ venv/
 # third-party test files
 *test.py
 *.jpg
+.coverage
