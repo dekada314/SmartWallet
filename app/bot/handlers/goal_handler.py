@@ -4,6 +4,7 @@ from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import CallbackQuery
 
 from app.bot.keyboards.keyboards import Keyboards
+from app.bot.middleware.goal_middleware import GoalMiddleware
 from app.dto.requests.del_goal_request import DelGoalRequest
 from app.dto.requests.save_goal_request import SaveGoalRequest
 from application.use_cases.change_goal_desc_use_case import ChangeGoalDescUseCase
@@ -38,9 +39,12 @@ class GoalHandler:
         self.delete_goal_us = delete_goal_us
         self.change_goal_us = change_goal_us
         self.exceeding_the_limits_us = exceeding_the_limits_us
-        self.router = Router()
+        self.router = Router(name="goal_router")
 
     def register(self):
+        self.router.message.middleware(GoalMiddleware())
+        self.router.callback_query.middleware(GoalMiddleware())
+        
         @self.router.message(lambda message: message.text == "Цели")
         async def handle_goaks_button(message: types.Message):
             await message.answer(

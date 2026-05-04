@@ -12,6 +12,7 @@ from app.bot.handlers.expense_handler import ExpenseHandler
 from app.bot.handlers.goal_handler import GoalHandler
 from app.bot.handlers.income_handler import IncomeHandler
 from app.bot.handlers.statistics_handler import StatisticsHandler
+from app.core.logs_config.logger import LogManager
 from application.use_cases.add_expense_user_case import AddExpenseUseCase
 from application.use_cases.add_income_use_case import AddIncomeUseCase
 from application.use_cases.change_goal_desc_use_case import ChangeGoalDescUseCase
@@ -35,6 +36,9 @@ from infrastructure.database.implementations.sqlite_user_repository import (
 from infrastructure.external_services.get_categories import GetCategories
 from infrastructure.external_services.receipt_parser import ReceiptParser
 from infrastructure.external_services.sheduler import APSCheduler
+from infrastructure.knowledge_base.implementations.yaml_advices_repository import (
+    YamlAdvicesRepository,
+)
 from infrastructure.knowledge_base.implementations.yaml_categories_repository import (
     YamlCategoriesRepository,
 )
@@ -45,11 +49,15 @@ load_dotenv()
 
 
 async def main():
+    logger = LogManager()
+    logger.setup()
+
     user_db = SQLiteUserRepository(settings.SQLITE_USERS)
     await user_db.init_db()
     transaction_db = SQLiteTransactionRepository(settings.SQLITE_TRANSACTIONS)
     await transaction_db.init_db()
     categories_kb = YamlCategoriesRepository(settings.YAML_CATEGORIES)
+    advices_kb = YamlAdvicesRepository(settings.YAML_ADVICES)
     goal_db = SqliteGoalsRepository(settings.SQLITE_GOALS)
     await goal_db._init_db()
 
@@ -71,7 +79,7 @@ async def main():
     update_goal_us = UpdateGoalUseCase(goal_db)
     exceeding_limits_us = ExceedingTheLimitUseCase(goal_db)
     add_income_us = AddIncomeUseCase(user_db, transaction_db)
-    give_advice_us = GiveAdviceUseCase(settings.YAML_ADVICES)
+    give_advice_us = GiveAdviceUseCase(advices_kb)
     get_categories = GetCategories(categories_kb)
     receipt_parser = ReceiptParser(categories_kb)
     statistics_us = GetStatiscticsPerPeriod(transaction_db)

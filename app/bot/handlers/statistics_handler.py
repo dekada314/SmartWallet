@@ -2,6 +2,7 @@ from aiogram import F, Router, types
 from aiogram.filters import Command
 
 from app.bot.keyboards.keyboards import Keyboards
+from app.bot.middleware.statistics_middleware import StatisticsMiddleware
 from app.dto.requests.get_statistics_request import StatisticsRequest
 from app.dto.responses.statistics_reponse import StatisticsResponse
 from application.use_cases.enums import PeriodType
@@ -25,9 +26,12 @@ period_to_rus_period = {
 class StatisticsHandler:
     def __init__(self, analytic_use_case: GetStatiscticsPerPeriod):
         self.analytic_use_case = analytic_use_case
-        self.router = Router()
+        self.router = Router(name="statistics_router")
 
     def register(self):
+        self.router.message.middleware(StatisticsMiddleware())
+        self.router.callback_query.middleware(StatisticsMiddleware())
+        
         def _stats_output(text_period, response: StatisticsResponse):
             return (
                 f"<b>Ваша статистика за {text_period}</b>:\n\n"

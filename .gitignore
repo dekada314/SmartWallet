@@ -1,11 +1,11 @@
 # Python-generated files
-__pycache__/
+**/__pycache__/
 *.py[oc]
 build/
 dist/
 wheels/
 *.egg-info
-.DS_Store
+**/.DS_Store
 
 # Virtual environments
 .venv
@@ -13,11 +13,15 @@ venv/
 .env
 
 # Ruff files
-.ruff_cache
+**/.ruff_cache
 
 # Database
 
+# Logs
+*.log
+
 # third-party test files
 *test.py
+**/.pytest_cache
 *.jpg
 .coverage

@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from app.dto.requests.user_registry_request import UserRegistryRequest
+from app.dto.responses.user_response import UserResponse
 from domain.entities.user import User
 from domain.repositories.base_user_repository import BaseUserRepository
 
@@ -22,5 +23,4 @@ class UserRegisterUseCase:
         )
 
         await self.user_repository.save_user(new_user)
-
-        return new_user
+        return UserResponse.from_domain(new_user)

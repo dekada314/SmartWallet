@@ -2,16 +2,16 @@ import random
 
 import yaml
 
+from app.dto.responses.advice_reponse import AdviceModel
+from domain.repositories.base_advice_repository import BaseAdviceRepository
+
 
 class GiveAdviceUseCase:
-    def __init__(self, advices_path: str):
-        self.advices_path = advices_path
+    def __init__(self, advices_repo: BaseAdviceRepository):
+        self.advices_repo = advices_repo
 
-    def execute(self) -> str:
-        with open(self.advices_path, "r", encoding="utf-8") as file:
-            data = yaml.safe_load(file)
-        advices = data["types"]
-        item = random.choice(advices)
-        key = list(item.keys())[0]
-        advice = item[key]
-        return f"{advice['name']}\n\n{advice['description']}"
+    async def execute(self) -> str:
+        advices = self.advices_repo.get_all_advices()
+
+        advice: dict[str, str] = list(random.choice(advices).values())[0]
+        return AdviceModel(name=advice["name"], advice=advice["description"])

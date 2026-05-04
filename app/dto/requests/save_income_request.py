@@ -1,7 +1,5 @@
 from pydantic import BaseModel, field_validator
 
-from application.exceptions.exceptions import NotValidAmountError
-
 
 class SaveIncomeRequest(BaseModel):
     user_id: int

@@ -15,12 +15,17 @@ from domain.entities.transaction import Transaction
 from infrastructure.external_services.get_categories import GetCategories
 from infrastructure.external_services.receipt_parser import ReceiptParser
 
+from ..middleware.finance_middleware import FinanceMiddleware
+
 
 class ExpenseForm(StatesGroup):
-    waiting_for_callback = State()
+    waiting_text_input = State()
+    waiting_for_user_input = State()
+    waiting_for_doc_input = State()
+
+
+class ButtonsInputForm(StatesGroup):
     waiting_for_category = State()
-    waiting_for_amount = State()
-    waiting_for_doc = State()
 
 
 class ExpenseHandler:
@@ -33,9 +38,11 @@ class ExpenseHandler:
         self.get_categories = get_categories
         self.add_expense_us = add_expense_us
         self.receipt_parser = receipt_parser
-        self.router = Router()
+        self.router = Router(name="expense_router")
 
     def register(self):
+        self.router.message.middleware(FinanceMiddleware())
+
         def _transaction_format(transaction: Transaction):
             return (
                 f"🏦 <b>Ваша транзакция</b> \n\n"
@@ -45,7 +52,7 @@ class ExpenseHandler:
             )
 
         @self.router.message(lambda message: message.text == "Ввести расход")
-        async def handle_expense_button(message: types.Message):
+        async def handle_expense_button(message: types.Message, state: FSMContext):
             await message.answer(
                 "<b>Выберите тип ввода:</b>",
                 reply_markup=Keyboards.get_enter_expense_buttons(),
@@ -63,13 +70,17 @@ class ExpenseHandler:
                 "<i>15 рублей за продукты </i>\n",
                 parse_mode="HTML",
             )
-            await state.set_state(ExpenseForm.waiting_for_callback)
+            await state.set_state(ExpenseForm.waiting_text_input)
 
-        @self.router.message(ExpenseForm.waiting_for_callback)
+        @self.router.message(ExpenseForm.waiting_text_input)
         async def handle_enter_by_text(message: types.Message, state: FSMContext):
             try:
                 transaction_dto = SaveTransactionRequest(
                     owner_id=message.from_user.id, text=message.text
+                )
+
+                await state.update_data(
+                    amount=transaction_dto.text, operation_type="expense"
                 )
 
                 transaction = await self.add_expense_us.execute(transaction_dto)
@@ -87,7 +98,7 @@ class ExpenseHandler:
         # --------------------------
 
         @self.router.callback_query(F.data == "enter_by_buttons")
-        async def enter_by_buttons(callback: CallbackQuery, state: FSMContext):
+        async def handle_enter_by_buttons(callback: CallbackQuery, state: FSMContext):
             await callback.answer()
             all_categories = self.get_categories.get_categories_names()
 
@@ -98,16 +109,16 @@ class ExpenseHandler:
             await callback.message.answer(
                 "Выберите категорию:", reply_markup=main_keyboard
             )
-            await state.set_state(ExpenseForm.waiting_for_category)
+            await state.set_state(ButtonsInputForm.waiting_for_category)
 
-        @self.router.message(ExpenseForm.waiting_for_category)
+        @self.router.message(ButtonsInputForm.waiting_for_category)
         async def handle_category_by_user(message: types.Message, state: FSMContext):
             user_category = message.text
             await state.update_data(user_category=user_category)
             await message.answer("Введите сумму затраты")
-            await state.set_state(ExpenseForm.waiting_for_amount)
+            await state.set_state(ExpenseForm.waiting_for_user_input)
 
-        @self.router.message(ExpenseForm.waiting_for_amount)
+        @self.router.message(ExpenseForm.waiting_for_user_input)
         async def handle_category_with_amount(
             message: types.Message, state: FSMContext
         ):
@@ -118,6 +129,10 @@ class ExpenseHandler:
 
             transaction_dto = SaveTransactionRequest(
                 owner_id=message.from_user.id, text=amount
+            )
+
+            await state.update_data(
+                amount=transaction_dto.text, operation_type="expense"
             )
 
             transaction = await self.add_expense_us.execute(
@@ -138,9 +153,9 @@ class ExpenseHandler:
         async def enter_by_check(callback: CallbackQuery, state: FSMContext):
             await callback.answer()
             await callback.message.answer("Присылайте фото/файл вашего чека!")
-            await state.set_state(ExpenseForm.waiting_for_doc)
+            await state.set_state(ExpenseForm.waiting_for_doc_input)
 
-        # @self.router.message(ExpenseForm.waiting_for_doc, F.photo)
+        # @self.router.message(ExpenseForm.waiting_for_doc_input, F.photo)
         # async def handle_enter_by_photo(message: types.Message, state: FSMContext):
         #     photo = message.photo[-1]
         #     file = await message.bot.get_file(photo.file_id)
@@ -154,15 +169,15 @@ class ExpenseHandler:
         #     except Exception as e:
         #         await message.answer(f"Произошла ошибка при чтении: {e}")
 
-        @self.router.message(ExpenseForm.waiting_for_doc, F.document)
-        async def handle_enter_by_file(message: types.Message):
+        @self.router.message(ExpenseForm.waiting_for_doc_input, F.document)
+        async def handle_enter_by_file(message: types.Message, state: FSMContext):
             document = message.document
             file = await message.bot.get_file(document.file_id)
             file_ext = (
                 document.file_name.split(".")[-1].lower() if document.file_name else ""
             )
 
-            file_path = f"receipts/receipt{message.from_user.id}_{document.file_unique_id}.{file_ext}"
+            file_path = f"assets/receipts/receipt{message.from_user.id}_{document.file_unique_id}.{file_ext}"
             await message.bot.download_file(file.file_path, destination=file_path)
 
             try:
@@ -170,6 +185,11 @@ class ExpenseHandler:
                 transaction_dto = SaveTransactionRequest(
                     message.from_user.id, parsed_data["amount"]
                 )
+
+                await state.update_data(
+                    amount=transaction_dto.text, operation_type="expense"
+                )
+
                 transaction: Transaction = await self.add_expense_us.execute(
                     dto=transaction_dto, category=parsed_data["category"]
                 )
@@ -180,3 +200,4 @@ class ExpenseHandler:
                     )
             except ValidationError:
                 await message.answer("❌ Неверный формат ввода")
+                raise

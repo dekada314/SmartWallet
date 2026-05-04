@@ -1,5 +1,7 @@
 from app.dto.requests.save_transaction_request import SaveTransactionRequest
+from application.exceptions.exceptions import GettingUserError
 from domain.entities.transaction import Transaction
+from domain.entities.user import User
 from domain.enums.transaction_type import TransactionType
 from domain.repositories.base_categories_repository import BaseCategoriesRepositry
 from domain.repositories.base_transaction_repository import BaseTransactionRepository
@@ -26,6 +28,11 @@ class AddExpenseUseCase:
     async def execute(
         self, dto: SaveTransactionRequest, category: str = None
     ) -> Transaction | None:
+        user: User = await self.user_repository.get_user_by_user_id(income_dto.user_id)
+
+        if not user:
+            raise GettingUserError
+
         if category is not None:
             output_category = category
             amount = float(dto.text)
@@ -47,11 +54,13 @@ class AddExpenseUseCase:
             source_text=source_text,
             transaction_type=TransactionType.EXPENSE,
         )
-
-        await self.transaction_repositry.save_transaction(new_transaction)
-        await self.user_repository.update_balance(
-            new_transaction.user_id, -new_transaction.amount
-        )
-        await self.user_repository.update_last_action(new_transaction.user_id)
+        try:
+            await self.transaction_repositry.save_transaction(new_transaction)
+            await self.user_repository.update_balance(
+                new_transaction.user_id, -new_transaction.amount
+            )
+            await self.user_repository.update_last_action(new_transaction.user_id)
+        except:
+            raise
 
         return new_transaction
