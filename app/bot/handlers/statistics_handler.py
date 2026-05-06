@@ -11,7 +11,7 @@ from application.use_cases.get_statistics_use_case import GetStatiscticsPerPerio
 callback_to_period = {
     "per_day": PeriodType.DAY,
     "per_week": PeriodType.WEEK,
-    "per_mouth": PeriodType.MONTH,
+    "per_month": PeriodType.MONTH,
     "per_year": PeriodType.YEAR,
 }
 
@@ -29,9 +29,9 @@ class StatisticsHandler:
         self.router = Router(name="statistics_router")
 
     def register(self):
-        self.router.message.middleware(StatisticsMiddleware())
-        self.router.callback_query.middleware(StatisticsMiddleware())
-        
+        # self.router.message.middleware(StatisticsMiddleware())
+        # self.router.callback_query.middleware(StatisticsMiddleware())
+
         def _stats_output(text_period, response: StatisticsResponse):
             return (
                 f"<b>Ваша статистика за {text_period}</b>:\n\n"

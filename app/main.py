@@ -42,15 +42,14 @@ from infrastructure.knowledge_base.implementations.yaml_advices_repository impor
 from infrastructure.knowledge_base.implementations.yaml_categories_repository import (
     YamlCategoriesRepository,
 )
-from infrastructure.ml.classifier.model import SkClassifier
 from infrastructure.ml.embeddings.text_processing import TextProcessing
 
 load_dotenv()
 
 
 async def main():
-    logger = LogManager()
-    logger.setup()
+    # logger = LogManager()
+    # logger.setup()
 
     user_db = SQLiteUserRepository(settings.SQLITE_USERS)
     await user_db.init_db()
@@ -61,15 +60,12 @@ async def main():
     goal_db = SqliteGoalsRepository(settings.SQLITE_GOALS)
     await goal_db._init_db()
 
-    ml_model = SkClassifier(
-        settings.DATASET_PATH, settings.VECTORIZER_PATH, settings.MODEL_PATH
-    )
     text_processing = TextProcessing(
         cat_examples=categories_kb.get_all_categories_examples()
     )
 
     add_expense_us = AddExpenseUseCase(
-        transaction_db, categories_kb, user_db, text_processing, ml_model
+        transaction_db, categories_kb, user_db, text_processing
     )
     register_us = UserRegisterUseCase(user_db)
     change_goal_us = ChangeGoalDescUseCase(goal_db)

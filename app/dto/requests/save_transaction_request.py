@@ -1,13 +1,21 @@
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 
 class SaveTransactionRequest(BaseModel):
-    owner_id: int = Field(gt=0)
+    user_id: int = Field(gt=0)
     text: str
+    category: str | None = None
 
-    @field_validator("text")
+    @field_validator("category")
     @classmethod
-    def transaction_text_must_not_be_empty(cls, field_value: str) -> str:
+    def transaction_text_must_be_not_empty(cls, field_value: str) -> str:
         if not field_value.strip():
             raise ValueError("Текст транзакции должен быть не пустым")
         return field_value
+
+    # @field_validator("amount", mode="before")
+    # @classmethod
+    # def amount_must_be_number(cls, field_value: str) -> str:
+    #     if isinstance(field_value, str):
+    #         field_value = field_value.strip().replace(",", ".")
+    #     return field_value

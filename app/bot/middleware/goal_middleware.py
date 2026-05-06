@@ -25,15 +25,16 @@ class GoalMiddleware(BaseMiddleware):
         event: TelegramObject,
         data: dict[str, Any],
     ) -> None:
-        start_time = datetime.now()
+        corr_context = CorrelationContext.set()
+        token = None
         try:
+            start_time = datetime.now()
+            token = await self._tokenizer.get_token(user_id=event.from_user.id)
             if isinstance(event, Message) and event.text == "Цели":
-                token = await self._tokenizer.get_token(user_id=event.from_user.id)
-                CorrelationContext.set()
                 self._main_log.info(
                     "[GOAL] Вход в рездел целей", extra={"user_id": token}
                 )
-            await handler(event, data)
+            result = await handler(event, data)
             duration_time = datetime.now() - start_time
         except ValidationError:
             self._main_log.error(
@@ -55,12 +56,14 @@ class GoalMiddleware(BaseMiddleware):
                     "user_id": token,
                 },
             )
+            raise
 
         else:
             self._main_log.info(
                 "[GOAL] Обработка целей закончена успешно",
                 extra={"user_id": token, "duration_time": duration_time},
             )
+            return result
 
         finally:
-            CorrelationContext.reset()
+            CorrelationContext.reset(corr_context)

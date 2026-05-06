@@ -17,7 +17,7 @@ class LogManager:
 
     def __new__(cls):
         if cls._instanсe is None:
-            return super().__new__(cls)
+            cls._instanсe = super().__new__(cls)
         return cls._instanсe
 
     def _add_corelation_id(self, _, __, event_dict):
@@ -54,7 +54,11 @@ class LogManager:
 
         root = logging.getLogger()
         root.setLevel(logging.INFO)
-        root.addHandler(self._build_rotate_handler("app.log", level=logging.INFO))
+        root.addHandler(self._build_rotate_handler("root.log", level=logging.INFO))
+
+        app_log = logging.getLogger("app")
+        app_log.addHandler(self._build_rotate_handler("app.log", level=logging.INFO))
+        app_log.propagate = False
 
         audit_log = logging.getLogger("audit")
         audit_log.addHandler(

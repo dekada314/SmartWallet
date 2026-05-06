@@ -16,4 +16,4 @@ class AdviceHandler:
         @self.router.message(lambda message: message.text == "Получить совет")
         async def handle_advice_button(message: types.Message):
             advice_reponse = await self.give_advice_us.execute()
-            await message.answer(_advice_output(advice_reponse))
+            await message.answer(_advice_output(advice_reponse), parse_mode="HTML")

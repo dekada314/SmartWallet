@@ -61,9 +61,12 @@ class SqliteGoalsRepository(BaseGoalsRepository):
                 (user_id, user_goal_id),
             )
             row = await cursor.fetchone()
+            if row:
+                row_dict = dict(row)
+                row_dict.pop("id", None)
 
-            goal = Goal(**row)
-            return goal  # noqa
+                return Goal(**row_dict)
+            return None
 
     async def update_goal(self, goal: Goal) -> None:
         async with aiosqlite.connect(self.db_path) as db:

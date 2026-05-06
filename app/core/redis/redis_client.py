@@ -7,7 +7,7 @@ from .redis_config import redis_config
 
 class RedisClient:
     _instance: None | Redis = None
-    _app_logger = LogManager().get_logger()
+    _app_logger = LogManager().get_logger("app")
 
     @classmethod
     async def get_client(cls) -> RedisClient:

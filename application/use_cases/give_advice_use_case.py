@@ -14,4 +14,4 @@ class GiveAdviceUseCase:
         advices = self.advices_repo.get_all_advices()
 
         advice: dict[str, str] = list(random.choice(advices).values())[0]
-        return AdviceModel(name=advice["name"], advice=advice["description"])
+        return AdviceModel(name=advice["name"], desc=advice["description"])

@@ -1,11 +1,8 @@
-from pathlib import Path
+from urllib.parse import quote
 
+from dotenv import find_dotenv
 from pydantic import SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
-
-ROOT_DIR = Path(__file__).resolve()
-while ROOT_DIR.name != "SmartWallet":
-    ROOT_DIR = ROOT_DIR.parent
 
 
 class RedisConfig(BaseSettings):
@@ -16,12 +13,15 @@ class RedisConfig(BaseSettings):
     password: None | SecretStr = None
 
     model_config = SettingsConfigDict(
-        env_file=".env", env_prefix="REDIS_", case_sensitive=True, extra="ignore"
+        env_file=find_dotenv(),
+        env_prefix="REDIS_",
+        extra="ignore",
     )
 
     def get_url(self) -> str:
         if self.password:
-            return f"redis://:{self.password}@{self.host}:{self.port}/{self.db}"
+            password = quote(self.password.get_secret_value(), safe="")
+            return f"redis://:{password}@{self.host}:{self.port}/{self.db}"
         return f"redis://{self.host}:{self.port}/{self.db}"
 
 

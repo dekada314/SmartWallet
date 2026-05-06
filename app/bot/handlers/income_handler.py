@@ -19,7 +19,7 @@ class IncomeHandler:
         self.router = Router(name="income_router")
 
     def register(self):
-        self.router.message.middleware(FinanceMiddleware())
+        # self.router.message.middleware(FinanceMiddleware())
 
         @self.router.message(lambda message: message.text == "Ввести доход")
         async def handle_income_button(message: types.Message, state: FSMContext):

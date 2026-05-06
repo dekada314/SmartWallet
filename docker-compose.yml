@@ -6,23 +6,63 @@ services:
     container_name: finance_bot
     env_file:
       - .env
+    volumes:
+      - ./logs:/bot/logs
     depends_on:
-      - redis:
-          condition: service_healthy
+      redis:
+        condition: service_healthy
+      localai:
+        condition: service_healthy
     restart: unless-stopped
+    networks:
+      - bot-network
   redis:
     image: redis:latest
-    ports:
-      - "6379:6379"
     volumes:
       - redis_data:/data
     healthcheck:
-      test: ["CMS", "redis-cli", "ping"]
-      interval: 1m30s
-      timeout: 30s
-      retries: 5
-      start_period: 30s
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    command: >
+      redis-server
+      --requirepass ${REDIS_PASSWORD}
+      --appendonly yes
+      --appendfsync everysec
+      --save 900 1
+      --save 300 10 
+      --maxmemory 512mb
+      --maxmemory-policy allkeys-lru
     restart: unless-stopped
+    networks:
+      - bot-network
+  localai:
+    image: localai/localai:v3.12.1-aio-cpu
+    container_name: localai-fallback
+    restart: unless-stopped
+    volumes:
+      - ./infrastructure/ml/dumps/localai-models:/models
+      - ./infrastructure/ml/dumps/localai-cache:/cache
+      - ./infrastructure/ml/dumps/localai-data:/data
+    environment:
+      - DEBUG=false
+      - CONTEXT_SIZE=512
+      - THREADS=4
+
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localai:8080/readyz"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    networks:
+      - bot-network
+
+networks:
+  bot-network:
+    driver: bridge
 
 volumes:
   redis_data:

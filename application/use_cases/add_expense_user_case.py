@@ -6,7 +6,6 @@ from domain.enums.transaction_type import TransactionType
 from domain.repositories.base_categories_repository import BaseCategoriesRepositry
 from domain.repositories.base_transaction_repository import BaseTransactionRepository
 from domain.repositories.base_user_repository import BaseUserRepository
-from infrastructure.ml.classifier.basic_classifier import BasicClassifier
 from infrastructure.ml.embeddings.text_processing import TextProcessing
 
 
@@ -17,37 +16,32 @@ class AddExpenseUseCase:
         categories_repository: BaseCategoriesRepositry,
         user_repository: BaseUserRepository,
         text_processing_unit: TextProcessing,
-        classifier: BasicClassifier,
     ):
         self.transaction_repositry = transaction_repository
         self.categories_repository = categories_repository
         self.user_repository = user_repository
         self.text_processing = text_processing_unit
-        self.model = classifier
 
-    async def execute(
-        self, dto: SaveTransactionRequest, category: str = None
-    ) -> Transaction | None:
-        user: User = await self.user_repository.get_user_by_user_id(income_dto.user_id)
+    async def execute(self, dto: SaveTransactionRequest) -> Transaction | None:
+        user: User = await self.user_repository.get_user_by_user_id(dto.user_id)
 
         if not user:
             raise GettingUserError
 
-        if category is not None:
-            output_category = category
+        if dto.category is not None:
+            output_category = dto.category
             amount = float(dto.text)
             source_text = None
         else:
             amount: float = self.text_processing.extract_amount(dto.text)
-            cat, conf = self.text_processing.classifier(dto.text)
-            # if conf > 0.7:
+            cat, _ = self.text_processing.classifier(dto.text)
             output_category = cat
             source_text = dto.text
 
-        last_user_id = await self.transaction_repositry.get_last_id(dto.owner_id)
+        last_user_id = await self.transaction_repositry.get_last_id(dto.user_id)
 
         new_transaction = Transaction(
-            user_id=dto.owner_id,
+            user_id=dto.user_id,
             user_transaction_id=last_user_id + 1,
             category=output_category,
             amount=amount,

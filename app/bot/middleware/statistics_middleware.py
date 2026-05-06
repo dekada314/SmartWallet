@@ -4,7 +4,6 @@ from typing import Any
 
 from aiogram import BaseMiddleware
 from aiogram.exceptions import TelegramAPIError
-from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, Message, TelegramObject
 from pydantic import ValidationError
 
@@ -26,26 +25,38 @@ class StatisticsMiddleware(BaseMiddleware):
         event: TelegramObject,
         data: dict[str, Any],
     ):
+        corr_context = CorrelationContext.set()
         start_time = datetime.now()
+        duration_time = None
+        token = None
         user_id = event.from_user.id
-        token = await self._tokenizer.get_token(user_id=user_id)
         try:
-            if event.text == "Статистика":
-                CorrelationContext.set()
+            token = await self._tokenizer.get_token(user_id=user_id)
+            if isinstance(event, Message) and event.text == "Статистика":
                 self._main_log.info(
                     "[STATS] Вход в блок статистики",
                     extra={
                         "user_id": token,
                     },
                 )
+                result = await handler(event, data)
+                duration_time = datetime.now() - start_time
 
-            elif isinstance(event, CallbackQuery) and event.data in ["per_day", "per_week", "per_month", "per_year"]:
+            elif isinstance(event, CallbackQuery) and event.data in [
+                "per_day",
+                "per_week",
+                "per_month",
+                "per_year",
+            ]:
                 self._main_log.info(
                     f"[STATS] Обработка запроса {event.data}",
                     extra={"user_id": token},
                 )
 
-                await handler(event, data)
+                result = await handler(event, data)
+                duration_time = datetime.now() - start_time
+            else:
+                result = await handler(event, data)
                 duration_time = datetime.now() - start_time
 
         except ValidationError:
@@ -68,7 +79,7 @@ class StatisticsMiddleware(BaseMiddleware):
                     "user_id": token,
                 },
             )
-
+            raise
         else:
             self._main_log.info(
                 "[STATS] Статисика успешно отображена",
@@ -77,5 +88,6 @@ class StatisticsMiddleware(BaseMiddleware):
                     "duration_time": duration_time,
                 },
             )
+            return result
         finally:
-            CorrelationContext.reset()
+            CorrelationContext.reset(corr_context)

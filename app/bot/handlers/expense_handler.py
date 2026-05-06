@@ -41,7 +41,8 @@ class ExpenseHandler:
         self.router = Router(name="expense_router")
 
     def register(self):
-        self.router.message.middleware(FinanceMiddleware())
+        # self.router.message.middleware(FinanceMiddleware())
+        # self.router.callback_query.middleware(FinanceMiddleware())
 
         def _transaction_format(transaction: Transaction):
             return (
@@ -76,12 +77,10 @@ class ExpenseHandler:
         async def handle_enter_by_text(message: types.Message, state: FSMContext):
             try:
                 transaction_dto = SaveTransactionRequest(
-                    owner_id=message.from_user.id, text=message.text
+                    user_id=message.from_user.id, text=message.text
                 )
 
-                await state.update_data(
-                    amount=transaction_dto.text, operation_type="expense"
-                )
+                await state.update_data(operation_type="expense")
 
                 transaction = await self.add_expense_us.execute(transaction_dto)
 
@@ -128,16 +127,12 @@ class ExpenseHandler:
             user_category = data.get("user_category")
 
             transaction_dto = SaveTransactionRequest(
-                owner_id=message.from_user.id, text=amount
+                user_id=message.from_user.id, text=amount, category=user_category
             )
 
-            await state.update_data(
-                amount=transaction_dto.text, operation_type="expense"
-            )
+            await state.update_data(operation_type="expense")
 
-            transaction = await self.add_expense_us.execute(
-                dto=transaction_dto, category=user_category
-            )
+            transaction = await self.add_expense_us.execute(dto=transaction_dto)
 
             if transaction:
                 await message.answer(
@@ -183,15 +178,15 @@ class ExpenseHandler:
             try:
                 parsed_data = self.receipt_parser.parse_file(file_path)
                 transaction_dto = SaveTransactionRequest(
-                    message.from_user.id, parsed_data["amount"]
+                    user_id=message.from_user.id,
+                    text=str(parsed_data["amount"]),
+                    category=parsed_data["category"],
                 )
 
-                await state.update_data(
-                    amount=transaction_dto.text, operation_type="expense"
-                )
+                await state.update_data(operation_type="expense")
 
                 transaction: Transaction = await self.add_expense_us.execute(
-                    dto=transaction_dto, category=parsed_data["category"]
+                    dto=transaction_dto
                 )
 
                 if transaction:

@@ -42,9 +42,9 @@ class GoalHandler:
         self.router = Router(name="goal_router")
 
     def register(self):
-        self.router.message.middleware(GoalMiddleware())
-        self.router.callback_query.middleware(GoalMiddleware())
-        
+        # self.router.message.middleware(GoalMiddleware())
+        # self.router.callback_query.middleware(GoalMiddleware())
+
         @self.router.message(lambda message: message.text == "Цели")
         async def handle_goaks_button(message: types.Message):
             await message.answer(

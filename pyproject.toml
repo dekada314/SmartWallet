@@ -22,3 +22,8 @@ dependencies = [
     "sentence-transformers>=5.4.1",
     "structlog>=25.5.0",
 ]
+
+[tool.uv]
+required-environments = [
+    "sys_platform == 'linux' and platform_machine == 'aarch64'"
+]

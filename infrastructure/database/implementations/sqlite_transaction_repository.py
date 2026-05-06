@@ -70,7 +70,8 @@ class SQLiteTransactionRepository(BaseTransactionRepository):
             )
             data = await cursor.fetchone()
             if data:
-                data = dict(data).pop("id", None)
+                data = dict(data)
+                data.pop("id", None)
                 return Transaction(**data)
         return None
 

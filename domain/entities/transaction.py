@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import date, datetime
 
 from domain.enums.transaction_type import TransactionType
@@ -12,4 +12,4 @@ class Transaction:
     amount: float
     source_text: str | None
     transaction_type: TransactionType
-    created_at: date = datetime.now()
+    created_at: date = field(default_factory=datetime.now)

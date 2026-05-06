@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import datetime
 
 from pydantic import BaseModel, Field
 
@@ -8,7 +8,7 @@ from domain.entities.user import User
 class UserResponse(BaseModel):
     user_id: int
     user_name: str
-    created_at: date
+    created_at: datetime
 
     @classmethod
     def from_domain(cls, user: User) -> UserResponse:

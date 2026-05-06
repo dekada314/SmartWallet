@@ -11,7 +11,7 @@ class CorrelationContext:
 
     @classmethod
     def set(cls) -> Token:
-        corr_id = str(uuid.uuid4)
+        corr_id = str(uuid.uuid4())
         return cls._correlation_id.set(corr_id)
 
     @classmethod
