@@ -1,5 +1,6 @@
 from aiogram.types import Message
 
+from app.core.logs_config.logger_wrappers import use_case_logger
 from app.dto.requests.save_goal_request import SaveGoalRequest
 from domain.entities.goal import Goal
 from domain.entities.user import User
@@ -10,6 +11,7 @@ class SaveGoalUseCase:
     def __init__(self, goal_repository: BaseGoalsRepository):
         self.goal_repository = goal_repository
 
+    @use_case_logger
     async def execute(self, dto: SaveGoalRequest) -> User:
         user_id = dto.user_id
         last_user_goal_id = await self.goal_repository.get_last_id(user_id)

@@ -2,6 +2,7 @@ import random
 
 import yaml
 
+from app.core.logs_config.logger_wrappers import use_case_logger
 from app.dto.responses.advice_reponse import AdviceModel
 from domain.repositories.base_advice_repository import BaseAdviceRepository
 
@@ -10,6 +11,7 @@ class GiveAdviceUseCase:
     def __init__(self, advices_repo: BaseAdviceRepository):
         self.advices_repo = advices_repo
 
+    @use_case_logger
     async def execute(self) -> str:
         advices = self.advices_repo.get_all_advices()
 

@@ -2,6 +2,7 @@ from dataclasses import astuple
 
 import aiosqlite
 
+from app.core.logs_config.logger_wrappers import repository_logger
 from domain.entities.goal import Goal
 from domain.repositories.base_goals_repository import BaseGoalsRepository
 
@@ -10,6 +11,7 @@ class SqliteGoalsRepository(BaseGoalsRepository):
     def __init__(self, goals_db_path: str):
         self.db_path = goals_db_path
 
+    @repository_logger
     async def _init_db(self) -> None:
         async with aiosqlite.connect(self.db_path) as db:
             await db.execute("""
@@ -25,6 +27,7 @@ class SqliteGoalsRepository(BaseGoalsRepository):
 
             await db.commit()
 
+    @repository_logger
     async def get_last_id(self, user_id: int) -> int:
         async with aiosqlite.connect(self.db_path) as db:
             db.row_factory = aiosqlite.Row
@@ -35,6 +38,7 @@ class SqliteGoalsRepository(BaseGoalsRepository):
             row = await cursor.fetchone()
             return row["last_num"] if row["last_num"] else 0
 
+    @repository_logger
     async def save_goal(self, goal: Goal) -> None:
         async with aiosqlite.connect(self.db_path) as db:
             await db.execute(
@@ -43,6 +47,7 @@ class SqliteGoalsRepository(BaseGoalsRepository):
             )
             await db.commit()
 
+    @repository_logger
     async def get_all_user_goals(self, user_id: int) -> list:
         async with aiosqlite.connect(self.db_path) as db:
             db.row_factory = aiosqlite.Row
@@ -53,6 +58,7 @@ class SqliteGoalsRepository(BaseGoalsRepository):
                 for row in data
             ]
 
+    @repository_logger
     async def get_goal_attrs(self, user_id: int, user_goal_id: int) -> Goal:
         async with aiosqlite.connect(self.db_path) as db:
             db.row_factory = aiosqlite.Row
@@ -68,6 +74,7 @@ class SqliteGoalsRepository(BaseGoalsRepository):
                 return Goal(**row_dict)
             return None
 
+    @repository_logger
     async def update_goal(self, goal: Goal) -> None:
         async with aiosqlite.connect(self.db_path) as db:
             await db.execute(
@@ -76,6 +83,7 @@ class SqliteGoalsRepository(BaseGoalsRepository):
             )
             await db.commit()
 
+    @repository_logger
     async def delete_goal(self, goal: Goal) -> None:
         async with aiosqlite.connect(self.db_path) as db:
             await db.execute(
@@ -85,6 +93,7 @@ class SqliteGoalsRepository(BaseGoalsRepository):
 
             await db.commit()
 
+    @repository_logger
     async def change_goal_text(self, user_id: int, goal_id: str, new_text: str) -> None:
         async with aiosqlite.connect(self.db_path) as db:
             await db.execute(
@@ -93,6 +102,7 @@ class SqliteGoalsRepository(BaseGoalsRepository):
             )
             await db.commit()
 
+    @repository_logger
     async def get_user_goals_count(self, user_id: int) -> int:
         async with aiosqlite.connect(self.db_path) as db:
             cursor = await db.execute(
@@ -101,6 +111,7 @@ class SqliteGoalsRepository(BaseGoalsRepository):
             data = await cursor.fetchone()
             return data[0] if data[0] else 0
 
+    @repository_logger
     async def get_users(self) -> list[int]:
         async with aiosqlite.connect(self.db_path) as db:
             cursor = await db.execute("SELECT user_id FROM goals")

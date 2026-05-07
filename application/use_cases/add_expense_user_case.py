@@ -1,3 +1,4 @@
+from app.core.logs_config.logger_wrappers import use_case_logger
 from app.dto.requests.save_transaction_request import SaveTransactionRequest
 from application.exceptions.exceptions import GettingUserError
 from domain.entities.transaction import Transaction
@@ -22,6 +23,7 @@ class AddExpenseUseCase:
         self.user_repository = user_repository
         self.text_processing = text_processing_unit
 
+    @use_case_logger
     async def execute(self, dto: SaveTransactionRequest) -> Transaction | None:
         user: User = await self.user_repository.get_user_by_user_id(dto.user_id)
 

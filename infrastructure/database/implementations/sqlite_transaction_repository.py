@@ -3,6 +3,7 @@ from datetime import datetime
 
 import aiosqlite
 
+from app.core.logs_config.logger_wrappers import repository_logger
 from domain.entities.transaction import Transaction
 from domain.repositories.base_transaction_repository import BaseTransactionRepository
 
@@ -11,6 +12,7 @@ class SQLiteTransactionRepository(BaseTransactionRepository):
     def __init__(self, transaction_db_path: str):
         self.db_path = transaction_db_path
 
+    @repository_logger
     async def init_db(self) -> None:
         async with aiosqlite.connect(self.db_path) as db:
             await db.execute("""
@@ -28,6 +30,7 @@ class SQLiteTransactionRepository(BaseTransactionRepository):
 
             await db.commit()
 
+    @repository_logger
     async def get_last_id(self, user_id: int) -> int:
         async with aiosqlite.connect(self.db_path) as db:
             db.row_factory = aiosqlite.Row
@@ -38,6 +41,7 @@ class SQLiteTransactionRepository(BaseTransactionRepository):
             row = await cursor.fetchone()
             return row[0] if row[0] else 0
 
+    @repository_logger
     async def save_transaction(self, transaction: Transaction) -> None:
         values = astuple(transaction)[:-2] + (
             transaction.transaction_type.value,
@@ -50,6 +54,7 @@ class SQLiteTransactionRepository(BaseTransactionRepository):
             )
             await db.commit()
 
+    @repository_logger
     async def delete_by_transaction_id(self, user_id, user_transaction_id: int) -> None:
         async with aiosqlite.connect(self.db_path) as db:
             await db.execute(
@@ -59,6 +64,7 @@ class SQLiteTransactionRepository(BaseTransactionRepository):
 
             await db.commit()
 
+    @repository_logger
     async def get_transaction_by_transaction_id(
         self, user_id, user_transaction_id: int
     ) -> Transaction | None:
@@ -75,6 +81,7 @@ class SQLiteTransactionRepository(BaseTransactionRepository):
                 return Transaction(**data)
         return None
 
+    @repository_logger
     async def get_user_transactions_count(self, user_id: int) -> int:
         async with aiosqlite.connect(self.db_path) as db:
             cursor = await db.execute(
@@ -84,6 +91,7 @@ class SQLiteTransactionRepository(BaseTransactionRepository):
             data = await cursor.fetchone()
             return data[0] if data[0] else 0
 
+    @repository_logger
     async def get_transactions_by_period(
         self, user_id: int, start_date: datetime, end_date: datetime
     ) -> list[Transaction]:

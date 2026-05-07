@@ -2,6 +2,7 @@ from datetime import datetime
 
 import aiosqlite
 
+from app.core.logs_config.logger_wrappers import repository_logger
 from domain.entities.user import User
 from domain.repositories.base_user_repository import BaseUserRepository
 
@@ -10,6 +11,7 @@ class SQLiteUserRepository(BaseUserRepository):
     def __init__(self, user_db_path: str):
         self.db_path = user_db_path
 
+    @repository_logger
     async def init_db(self):
         async with aiosqlite.connect(self.db_path) as db:
             await db.execute("""
@@ -25,6 +27,7 @@ class SQLiteUserRepository(BaseUserRepository):
 
             await db.commit()
 
+    @repository_logger
     async def save_user(self, user: User) -> None:
         async with aiosqlite.connect(self.db_path) as db:
             await db.execute(
@@ -40,12 +43,14 @@ class SQLiteUserRepository(BaseUserRepository):
 
             await db.commit()
 
+    @repository_logger
     async def delete_user_by_user_id(self, user_id: int) -> None:
         async with aiosqlite.connect(self.db_path) as db:
             await db.execute("DELETE FROM users WHERE user_id = ?", (user_id,))
 
             await db.commit()
 
+    @repository_logger
     async def get_user_by_user_id(self, user_id: int) -> User | None:
         async with aiosqlite.connect(self.db_path) as db:
             db.row_factory = aiosqlite.Row
@@ -64,6 +69,7 @@ class SQLiteUserRepository(BaseUserRepository):
                 )
             return None
 
+    @repository_logger
     async def update_last_action(self, user_id: int):
         async with aiosqlite.connect(self.db_path) as db:
             await db.execute(
@@ -73,6 +79,7 @@ class SQLiteUserRepository(BaseUserRepository):
 
             await db.commit()
 
+    @repository_logger
     async def update_balance(self, user_id: int, delta: int | float):
         async with aiosqlite.connect(self.db_path) as db:
             await db.execute(

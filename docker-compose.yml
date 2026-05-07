@@ -18,6 +18,7 @@ services:
       - bot-network
   redis:
     image: redis:latest
+    container_name: redis-client
     volumes:
       - redis_data:/data
     healthcheck:
@@ -43,20 +44,20 @@ services:
     container_name: localai-fallback
     restart: unless-stopped
     volumes:
-      - ./infrastructure/ml/dumps/localai-models:/models
-      - ./infrastructure/ml/dumps/localai-cache:/cache
-      - ./infrastructure/ml/dumps/localai-data:/data
+      - localai-models:/models
+      - localai-cache:/cache
+      - localai-data:/data
     environment:
       - DEBUG=false
       - CONTEXT_SIZE=512
       - THREADS=4
 
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localai:8080/readyz"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 60s
+    # healthcheck:
+    #   test: ["CMD", "curl", "-f", "http://localai:8080/readyz"]
+    #   interval: 30s
+    #   timeout: 10s
+    #   retries: 3
+    #   start_period: 60s
     networks:
       - bot-network
 
@@ -66,3 +67,6 @@ networks:
 
 volumes:
   redis_data:
+  localai-models:
+  localai-cache:
+  localai-data:

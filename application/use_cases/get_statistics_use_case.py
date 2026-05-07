@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 
+from app.core.logs_config.logger_wrappers import use_case_logger
 from app.dto.requests.get_statistics_request import StatisticsRequest
 from app.dto.responses.statistics_reponse import StatisticsResponse
 from application.use_cases.enums import PeriodType
@@ -11,6 +12,7 @@ class GetStatiscticsPerPeriod:
     def __init__(self, transaction_repo: BaseTransactionRepository):
         self.transaction_repo = transaction_repo
 
+    @use_case_logger
     async def execute(self, statistics_dto: StatisticsRequest) -> StatisticsResponse:
         now = datetime.now()
 

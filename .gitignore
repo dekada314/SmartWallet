@@ -25,4 +25,4 @@ venv/
 **/.pytest_cache
 *.jpg
 .coverage
-./infrastructure/ml/dumps/localai-models/.
+infrastructure/ml/dumps/

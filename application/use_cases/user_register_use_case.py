@@ -1,5 +1,6 @@
 from datetime import datetime
 
+from app.core.logs_config.logger_wrappers import use_case_logger
 from app.dto.requests.user_registry_request import UserRegistryRequest
 from app.dto.responses.user_response import UserResponse
 from domain.entities.user import User
@@ -10,6 +11,7 @@ class UserRegisterUseCase:
     def __init__(self, user_repository: BaseUserRepository):
         self.user_repository = user_repository
 
+    @use_case_logger
     async def execute(self, dto: UserRegistryRequest) -> User:
         user = await self.user_repository.get_user_by_user_id(dto.user_id)
         if user:

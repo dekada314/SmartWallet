@@ -1,3 +1,4 @@
+from app.core.logs_config.logger_wrappers import use_case_logger
 from app.dto.requests.save_income_request import SaveIncomeRequest
 from domain.entities.transaction import Transaction
 from domain.entities.user import User
@@ -17,6 +18,7 @@ class AddIncomeUseCase:
         self.user_repository = user_repository
         self.transction_repository = transaction_repository
 
+    @use_case_logger
     async def execute(self, income_dto: SaveIncomeRequest) -> None | float:
         user: User = await self.user_repository.get_user_by_user_id(income_dto.user_id)
 

@@ -3,6 +3,7 @@ from datetime import datetime
 from aiogram import Bot, Dispatcher
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
+from app.core.logs_config.logger_wrappers import service_logger
 from domain.repositories.base_goals_repository import BaseGoalsRepository
 
 
@@ -12,10 +13,12 @@ class APSCheduler:
         self.bot = bot
         self.scheduler = AsyncIOScheduler()
 
+    
     def start(self) -> None:
-        self.scheduler.add_job(self._tick, "cron", hour=9, minute=28, max_instances=1)
+        self.scheduler.add_job(self._tick, "cron", hour=7, minute=30, max_instances=1)
         self.scheduler.start()
 
+    @service_logger
     async def _tick(self) -> None:
         users_id = await self.db.get_users()
         for user in users_id:
