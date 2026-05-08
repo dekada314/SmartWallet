@@ -13,7 +13,6 @@ class APSCheduler:
         self.bot = bot
         self.scheduler = AsyncIOScheduler()
 
-    
     def start(self) -> None:
         self.scheduler.add_job(self._tick, "cron", hour=7, minute=30, max_instances=1)
         self.scheduler.start()

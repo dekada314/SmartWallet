@@ -21,11 +21,11 @@ def use_case_logger(func):
             _main_logger.exception(
                 f"[USE CASE] В работе {class_name}.{method_name} произошка ошибка {e}",
             )
+            raise
         else:
             _main_logger.info(
                 f"[USE CASE] {class_name}.{method_name} успешно отработал"
             )
-            raise
 
     return wrapper
 
@@ -46,11 +46,11 @@ def repository_logger(func):
             _main_logger.exception(
                 f"[REPOSITORY] В работе {class_name}.{method_name} произошка ошибка {e}",
             )
+            raise
         else:
             _main_logger.info(
                 f"[REPOSITORY] {class_name}.{method_name} успешно отработал"
             )
-            raise
 
     return wrapper
 
@@ -71,8 +71,8 @@ def service_logger(func):
             _main_logger.exception(
                 f"[SERVICE] В работе {class_name}.{method_name} произошка ошибка {e}",
             )
+            raise
         else:
             _main_logger.info(f"[SERVICE] {class_name}.{method_name} успешно отработал")
-            raise
 
     return wrapper

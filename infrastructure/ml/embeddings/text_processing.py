@@ -23,7 +23,7 @@ class TextProcessing:
         self,
         cat_examples: dict[str, list[str]],
         file_name_to_cache: str = "embeddings",
-        threshold: float = 0.2,
+        threshold: float = 0.4,
     ):
         self.threshold = threshold
         self.localai_url = os.getenv("LOCALAI_HOST")
@@ -80,24 +80,7 @@ class TextProcessing:
     def _cosine_similarity(self, vector1, vector2) -> float:
         return np.dot(vector1, vector2) / (
             np.linalg.norm(vector1) * np.linalg.norm(vector2)
-        ) 
-    @service_logger
-    def classifier(self, text: str):
-        text_vec = self.embd_model.encode(text, convert_to_numpy=True)
-
-        best_cat = None
-        best_score = float("-inf")
-
-        for cat, embedding in self._cat_embeddings.items():
-            score = self._cosine_similarity(text_vec, embedding)
-
-            if score > best_score:
-                best_cat = cat
-                best_score = score
-
-        return best_cat, best_score
-
-        # return self._localai_classifier()
+        )
 
     async def _localai_classifier(self, text: str):
         prompt = f"""
@@ -126,6 +109,7 @@ class TextProcessing:
             except Exception:
                 return "другое", 0.5
 
+    @service_logger
     async def classifier(self, text: str):
         text_vec = self.embd_model.encode(text, convert_to_numpy=True)
 

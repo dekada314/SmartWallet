@@ -48,15 +48,12 @@ class SqliteGoalsRepository(BaseGoalsRepository):
             await db.commit()
 
     @repository_logger
-    async def get_all_user_goals(self, user_id: int) -> list:
+    async def get_all_user_goals(self, user_id: int) -> list[Goal]:
         async with aiosqlite.connect(self.db_path) as db:
             db.row_factory = aiosqlite.Row
             cur = await db.execute("SELECT * FROM goals WHERE user_id = ?", (user_id,))
             data = await cur.fetchall()
-            return [
-                [row["text"], row["target"], row["curr_bill"], row["user_goal_id"]]
-                for row in data
-            ]
+            return [[Goal(**row)] for row in data]
 
     @repository_logger
     async def get_goal_attrs(self, user_id: int, user_goal_id: int) -> Goal:

@@ -52,12 +52,12 @@ services:
       - CONTEXT_SIZE=512
       - THREADS=4
 
-    # healthcheck:
-    #   test: ["CMD", "curl", "-f", "http://localai:8080/readyz"]
-    #   interval: 30s
-    #   timeout: 10s
-    #   retries: 3
-    #   start_period: 60s
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/readyz"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 120s
     networks:
       - bot-network
 

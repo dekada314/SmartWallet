@@ -1,7 +1,11 @@
+from io import BytesIO
+
+import matplotlib.patches as patches
+import matplotlib.pyplot as plt
 from aiogram import F, Router, types
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
-from aiogram.types import CallbackQuery
+from aiogram.types import CallbackQuery, BufferedInputFile
 
 from app.bot.keyboards.keyboards import Keyboards
 from app.bot.middleware.goal_middleware import GoalMiddleware
@@ -42,8 +46,52 @@ class GoalHandler:
         self.router = Router(name="goal_router")
 
     def register(self):
-        # self.router.message.middleware(GoalMiddleware())
-        # self.router.callback_query.middleware(GoalMiddleware())
+        self.router.message.middleware(GoalMiddleware())
+        self.router.callback_query.middleware(GoalMiddleware())
+
+        def _progress_donut(
+            current, total, title: str = "Процесс накопления"
+        ) -> BytesIO:
+            percent = (current / total) * 100
+            remaining = 100 - percent
+
+            fig, ax = plt.subplots(figsize=(6, 4))
+
+            sizes = [percent, remaining]
+            colors = ["#2ecc71", "#ecf0f1"]
+            labels = [f"Накоплено: {percent:.1f}%", f"Осталось: {remaining:.1f}%"]
+
+            wedges, texts, autotexts = ax.pie(
+                sizes,
+                labels=labels,
+                colors=colors,
+                autopct="%1.1f%%",
+                startangle=90,
+                wedgeprops={"edgecolor": "white", "linewidth": 2},
+            )
+
+            centre_circle = plt.Circle((0, 0), 0.70, fc="white", linewidth=0)
+            fig.gca().add_artist(centre_circle)
+
+            plt.text(
+                0,
+                0,
+                f"{current:,}\n/\n{total:,}",
+                ha="center",
+                va="center",
+                fontsize=14,
+                fontweight="bold",
+            )
+
+            ax.set_title(title, fontsize=14, pad=20)
+            ax.axis("equal")
+
+            bio = BytesIO()
+            plt.savefig(bio, format="png", dpi=100, bbox_inches="tight")
+            bio.seek(0)
+            plt.close()
+
+            return bio
 
         @self.router.message(lambda message: message.text == "Цели")
         async def handle_goaks_button(message: types.Message):
@@ -92,13 +140,22 @@ class GoalHandler:
             await callback.message.answer("Вот все ваши цели для настройки:")
 
             for index, goal in enumerate(data):
-                await state.update_data(goal_text=goal[0])
+                await state.update_data(goal_text=goal.text)
                 await callback.message.answer(
-                    f"<b>{index + 1}. {goal[0]}\n</b>"
-                    f"Ваш прогресс по этой цели:\n\n{progress_bar(goal[2], goal[1])}",
+                    f"<b>{index + 1}. {goal.text}\n</b>Ваш прогресс по этой цели:\n",
                     parse_mode="HTML",
-                    reply_markup=Keyboards.get_setup_goal_button(str(goal[3])),
                 )
+                
+                progress_chart = _progress_donut(goal.curr_bill, goal.target)
+                photo_file = BufferedInputFile(progress_chart.getvalue())
+                
+                if photo_file:
+                    await callback.message.answer_photo(
+                        photo=photo_file,
+                        reply_markup=Keyboards.get_setup_goal_button(
+                            str(goal.user_goal_id)
+                        ),
+                    )
 
         @self.router.callback_query(F.data.startswith("del_goal_"))
         async def handle_delete_goal(callback: CallbackQuery):
@@ -131,11 +188,6 @@ class GoalHandler:
                 await message.answer("Описание цели было успешно изменено!")
             await state.clear()
 
-        def progress_bar(current, total, length=10):
-            percent = current / total
-            to_fill = int(percent * length)
-            return "🟩" * to_fill + "⬜️" * (length - to_fill) + f"{percent * 100}%"
-
         @self.router.callback_query(F.data == "display_goals")
         async def handle_set_up_goals(callback: CallbackQuery, state: FSMContext):
             await callback.answer()
@@ -148,6 +200,7 @@ class GoalHandler:
 
                 for index, goal in enumerate(data):
                     await state.update_data(goal_text=goal[0])
+
                     await callback.message.answer(
                         f"<b>{index + 1}. {goal[0]}\n</b>"
                         f"Ваш прогресс по этой цели:\n\n{progress_bar(goal[2], goal[1])}",

@@ -41,8 +41,8 @@ class ExpenseHandler:
         self.router = Router(name="expense_router")
 
     def register(self):
-        # self.router.message.middleware(FinanceMiddleware())
-        # self.router.callback_query.middleware(FinanceMiddleware())
+        self.router.message.middleware(FinanceMiddleware())
+        self.router.callback_query.middleware(FinanceMiddleware())
 
         def _transaction_format(transaction: Transaction):
             return (

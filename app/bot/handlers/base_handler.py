@@ -15,7 +15,7 @@ class BaseHandler:
         self.router = Router(name="start_and_info_router")
 
     def register(self):
-        # self.router.message.middleware(StartMiddleware())
+        self.router.message.middleware(StartMiddleware())
 
         @self.router.message(Command("start"))
         async def handle_start_command(message: types.Message):

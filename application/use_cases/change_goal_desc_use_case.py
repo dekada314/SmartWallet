@@ -17,4 +17,3 @@ class ChangeGoalDescUseCase:
         user_id = message.from_user.id
 
         await self.goal_repository.change_goal_text(user_id, goal_id, message.text)
-

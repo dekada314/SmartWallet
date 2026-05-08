@@ -29,8 +29,8 @@ class StatisticsHandler:
         self.router = Router(name="statistics_router")
 
     def register(self):
-        # self.router.message.middleware(StatisticsMiddleware())
-        # self.router.callback_query.middleware(StatisticsMiddleware())
+        self.router.message.middleware(StatisticsMiddleware())
+        self.router.callback_query.middleware(StatisticsMiddleware())
 
         def _stats_output(text_period, response: StatisticsResponse):
             return (
