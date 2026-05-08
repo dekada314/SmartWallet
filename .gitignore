@@ -26,3 +26,4 @@ venv/
 *.jpg
 .coverage
 infrastructure/ml/dumps/
+*hash.*

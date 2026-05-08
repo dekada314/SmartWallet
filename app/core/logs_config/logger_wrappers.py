@@ -16,7 +16,7 @@ def use_case_logger(func):
         )
 
         try:
-            func(*args, **kwargs)
+            await func(*args, **kwargs)
         except Exception as e:
             _main_logger.exception(
                 f"[USE CASE] В работе {class_name}.{method_name} произошка ошибка {e}",
