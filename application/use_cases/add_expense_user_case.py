@@ -1,5 +1,8 @@
+from datetime import datetime
+
 from app.core.logs_config.logger_wrappers import use_case_logger
 from app.dto.requests.save_transaction_request import SaveTransactionRequest
+from app.dto.responses.transaction_response import TransactionReponse
 from application.exceptions.exceptions import GettingUserError
 from domain.entities.transaction import Transaction
 from domain.entities.user import User
@@ -24,9 +27,8 @@ class AddExpenseUseCase:
         self.text_processing = text_processing_unit
 
     @use_case_logger
-    async def execute(self, dto: SaveTransactionRequest) -> Transaction | None:
+    async def execute(self, dto: SaveTransactionRequest) -> tuple[Transaction, list[str]] | None:
         user: User = await self.user_repository.get_user_by_user_id(dto.user_id)
-
         if not user:
             raise GettingUserError
 
@@ -42,7 +44,7 @@ class AddExpenseUseCase:
 
         last_user_id = await self.transaction_repositry.get_last_id(dto.user_id)
 
-        new_transaction = Transaction(
+        transaction = Transaction(
             user_id=dto.user_id,
             user_transaction_id=last_user_id + 1,
             category=output_category,
@@ -50,13 +52,26 @@ class AddExpenseUseCase:
             source_text=source_text,
             transaction_type=TransactionType.EXPENSE,
         )
+        
+        rules = self.categories_repository.get_categories_rules(transaction.category)
+        
+        hints_for_user = []
+        if rules:
+            day_of_week = datetime.now().weekday()
+            current_time = datetime.now().time()
+            limit_time = datetime.time(23, 0)
+            category_limit = self.categories_repository.get_waste_for_cat(transaction.category)
+            
+            for rule in rules:
+                if eval(rule.get("condition", "")):
+                    hints_for_user.append(rule.get("text", "Даже и посоветовать нечего)"))     
         try:
-            await self.transaction_repositry.save_transaction(new_transaction)
+            await self.transaction_repositry.save_transaction(transaction)
             await self.user_repository.update_balance(
-                new_transaction.user_id, -new_transaction.amount
+                transaction.user_id, -transaction.amount
             )
-            await self.user_repository.update_last_action(new_transaction.user_id)
+            await self.user_repository.update_last_action(transaction.user_id)
         except:
             raise
 
-        return new_transaction
+        return TransactionReponse(transaction=transaction, warnings=hints_for_user)

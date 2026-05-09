@@ -1,3 +1,20 @@
+wastes:
+  food: 450 
+  monthly_payments: 60
+  transport: 90
+  takeaway_food: 50
+  shopping: 120
+  health: 200
+  entertainment: 100
+  technic: 50
+  addiction: 30
+  hobby: 50
+  chancellery: 20
+  household_chemicals: 20
+  beauty: 120
+  digital_services: 30
+  education: 70
+
 ontology:
   categories:
     - id: "food"
@@ -665,91 +682,90 @@ category_examples:
     - "заказ курсовой работы на стороне"
 
 rules:
-  - id: "overspend_critical"
-    condition: "current_expense > user_limit AND category.priority <= 2"
-    text: "⚠️ Внимание! Лимит по важной категории '{category}' превышен. Будьте осторожны с дальнейшими тратами."
+  common:
+    - id: "overspend_critical"
+      condition: "current_expense > user_limit and category.priority <= 2"
+      text: "⚠️ Внимание! Лимит по важной категории '{category}' превышен. Будьте осторожны с дальнейшими тратами."
 
-  - id: "optional_expense_warning"
-    condition: "current_expense > (user_limit * 0.8) AND category.priority >= 4"
-    text: "🔔 Вы почти израсходовали лимит на '{category}'. Это необязательные траты, может стоит приберечь деньги?"
+    - id: "optional_expense_warning"
+      condition: "current_expense > (user_limit * 0.8) and category.priority >= 4"
+      text: "🔔 Вы почти израсходовали лимит на '{category}'. Это необязательные траты, может стоит приберечь деньги?"
 
-  - id: "addiction_control"
-    condition: "category.id == 'addiction' AND amount > 50"
-    text: "💡 Заметил крупную трату на вредные привычки. Попробуйте отложить эти деньги в 'копилку' в следующем месяце!"
+    - id: "essential_priority"
+      condition: "user.balance < 100 and category.is_essential == false"
+      text: "🛑 Стоп! Баланс карты низкий. Категория '{category}' не является обязательной. Рекомендую воздержаться от покупки."
 
-  - id: "essential_priority"
-    condition: "user.balance < 100 AND category.is_essential == false"
-    text: "🛑 Стоп! Баланс карты низкий. Категория '{category}'1 не является обязательной. Рекомендую воздержаться от покупки."
-rules:
-  - id: "hard_limit_exceeded"
-    condition: "current_expense > user_limit"
-    text: "🚨 Стоп! Лимит по категории '{category}' исчерпан. Дальнейшие траты приведут к дефициту бюджета."
+    - id: "hard_limit_exceeded"
+      condition: "current_expense > user_limit"
+      text: "🚨 Стоп! Лимит по категории '{category}' исчерпан. Дальнейшие траты приведут к дефициту бюджета."
 
-  - id: "low_balance_essential_check"
-    condition: "user.balance < 50 AND category.is_essential == false"
-    text: "📉 Баланс критический (меньше 50р). Категория '{category}' не обязательна. Может, отложим до стипендии?"
+    - id: "low_balance_essential_check"
+      condition: "user.balance < 50 and category.is_essential == false"
+      text: "📉 Баланс критический (меньше 50р). Категория '{category}' не обязательна. Может, отложим до стипендии?"
 
-  - id: "emergency_health"
-    condition: "category.id == 'health' AND amount > 200"
-    text: "🩺 Ого, крупная трата на здоровье. Напоминаю: на лекарствах и врачах не экономят, но проверь возможность налогового вычета!"
+    - id: "early_month_waste"
+      condition: "day_of_month < 10 and total_spent > (monthly_limit * 0.5)"
+      text: "⚠️ Только начало месяца, а ты уже потратил половину бюджета! Давай притормозим, впереди еще 20 дней."
 
-  - id: "coffee_addict"
-    condition: "category.id == 'takeaway_food' AND count_per_day >= 3"
-    text: "☕️ Третий визит в кофейню за день? Твой пульс и кошелек в легком шоке. Может, сегодня хватит?"
+    - id: "end_of_month_pro"
+      condition: "day_of_month > 25 and user.balance > 150"
+      text: "🌟 Ого! Конец месяца, а у тебя еще солидный запас. Ты настоящий мастер финансового планирования!"
 
-  - id: "beauty_splurge"
-    condition: "category.id == 'beauty' AND amount > 150"
-    text: "💅 Серьезное вложение в красоту! Главное, чтобы результат радовал. Не забудь заложить эту сумму в план на следующий месяц."
+  addiction:
+    - id: "addiction_control"
+      condition: "transaction.category == 'addiction' and transaction.amount > 10"
+      text: "💡 Заметил крупную трату на вредные привычки. Попробуйте отложить эти деньги в 'копилку' в следующем месяце!"
 
-  - id: "fastfood_streak"
-    condition: "category.id == 'takeaway_food' AND count_per_week > 5"
-    text: "🍔 Похоже, на этой неделе ты частый гость в фастфуде. Домашняя еда сэкономила бы тебе минимум 40% этой суммы."
+    - id: "addiction_high_priority"
+      condition: "transaction.category == 'addiction' and user.balance < 30"
+      text: "🛑 Денег почти нет, а ты тратишь на вредные привычки. Это плохой знак. Может, сегодня обойдемся без этого?"
 
-  - id: "subscription_trap"
-    condition: "category.id == 'digital_services' AND count_per_month > 5"
-    text: "🎧 Заметил много мелких подписок. Проверь список активных сервисов — часто мы платим за то, чем уже не пользуемся."
+  takeaway_food:
+    - id: "night_food_order"
+      condition: "category.id == 'takeaway_food' and current_time > limit_time"
+      text: "🌙 Ночной дожор? Доставка в это время всегда дороже. Твой бюджет просит пощады (и сна)!"
 
-  - id: "taxi_vs_transport"
-    condition: "category.id == 'transport' AND amount > 25"
-    text: "🚕 Дорогая поездка! Если это такси в час пик — сочувствую. Если нет — вспомни про существование метро, там нет пробок."
+  health:
+    - id: "emergency_health"
+      condition: "transaction.category == 'health' and transaction.amount > 50"
+      text: "🩺 Ого, крупная трата на здоровье. Напоминаю: на лекарствах и врачах не экономят, но проверь возможность налогового вычета!"
 
-  - id: "night_food_order"
-    condition: "category.id == 'takeaway_food' AND time > '23:00'"
-    text: "🌙 Ночной дожор? Доставка в это время всегда дороже. Твой бюджет просит пощады (и сна)!"
+  beauty:
+    - id: "beauty_splurge"
+      condition: "transaction.category == 'beauty' and transaction.amount > 100"
+      text: "💅 Серьезное вложение в красоту! Главное, чтобы результат радовал. Не забудь заложить эту сумму в план на следующий месяц."
 
-  - id: "weekend_party_alert"
-    condition: "day_of_week in ['Sat', 'Sun'] AND category.id == 'entertainment' AND amount > 100"
-    text: "🎉 Выходные удались! Но следи за балансом, чтобы понедельник не стал 'черным' днем для кошелька."
+  digital_services:
+    - id: "subscription_trap"
+      condition: "transaction.category == 'digital_services' and transaction.amount > 20"
+      text: "🎧 Заметил крупную подписку. Проверь список активных сервисов — часто мы платим за то, чем уже не пользуемся."
 
-  - id: "early_month_waste"
-    condition: "day_of_month < 10 AND total_spent > (monthly_limit * 0.5)"
-    text: "⚠️ Только начало месяца, а ты уже потратила половину бюджета! Давай притормозим, впереди еще 20 дней."
+  transport:
+    - id: "taxi_vs_transport"
+      condition: "transaction.category == 'transport' and transaction.amount > 25"
+      text: "🚕 Дорогая поездка! Если это такси в час пик — сочувствую. Если нет — вспомни про существование метро, там нет пробок."
 
-  - id: "end_of_month_pro"
-    condition: "day_of_month > 25 AND user.balance > 150"
-    text: "🌟 Ого! Конец месяца, а у тебя еще солидный запас. Ты настоящий мастер финансового планирования!"
+  entertainment:
+    - id: "weekend_party_alert"
+      condition: "day_of_week in [5, 6] and transaction.category == 'entertainment' and transaction.amount > 100"
+      text: "🎉 Выходные удались! Но следи за балансом, чтобы понедельник не стал 'черным' днем для кошелька."
 
-  - id: "education_investment"
-    condition: "category.id == 'education' AND amount > 50"
-    text: "📚 Траты на учебу — это лучшие инвестиции. Эти знания окупятся многократно, так что тут ты молодец!"
+  education:
+    - id: "education_investment"
+      condition: "transaction.category == 'education' and transaction.amount > 50"
+      text: "📚 Траты на учебу — это лучшие инвестиции. Эти знания окупятся многократно, так что тут ты молодец!"
 
-  - id: "hobby_impulse"
-    condition: "category.id == 'hobby' AND amount > 100"
-    text: "🎨 Новое снаряжение для хобби? Круто! Главное, чтобы оно не пылилось на полке, как тот эспандер в прошлом году."
+  hobby:
+    - id: "hobby_impulse"
+      condition: "transaction.category == 'hobby' and transaction.amount > 25"
+      text: "🎨 Новое снаряжение для хобби? Круто! Главное, чтобы оно не пылилось на полке, как тот эспандер в прошлом году😇."
 
-  - id: "chancellery_rush"
-    condition: "category.id == 'chancellery' AND amount > 40"
-    text: "🖋 Закупилась канцелярией? Похоже, кто-то настроен серьезно учиться. Или просто красивые блокноты — твоя слабость?"
+  chancellery:
+    - id: "chancellery_rush"
+      condition: "transaction.category == 'chancellery' and transaction.amount > 40"
+      text: "🖋 Закупилась канцелярией? Похоже, кто-то настроен серьезно учиться. Или просто красивые блокноты — твоя слабость?"
 
-  - id: "addiction_high_priority"
-    condition: "category.id == 'addiction' AND user.balance < 30"
-    text: "🛑 Денег почти нет, а ты тратишь на вредные привычки. Это плохой знак. Может, сегодня обойдемся без этого?"
-
-  - id: "addiction_summary"
-    condition: "category.id == 'addiction' AND count_per_week > 4"
-    text: "🚬 Заметил частое пополнение в этой категории. Попробуй посчитать, сколько бы ты накопила на новый iPhone, если бы бросила."
-
-
-  - id: "chemicals_stock"
-    condition: "category.id == 'household_chemicals' AND amount > 60"
-    text: "🧼 Большая закупка бытовой химии. Зато теперь на месяц вперед можно забыть о порошках и моющих!"
+  household_chemicals:
+    - id: "chemicals_stock"
+      condition: "transaction.category == 'household_chemicals' and transaction.amount > 10"
+      text: "🧼 Большая закупка бытовой химии. Зато теперь на месяц вперед можно забыть о порошках и моющих(надеюсь)!"

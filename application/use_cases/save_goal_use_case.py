@@ -20,4 +20,4 @@ class SaveGoalUseCase:
             await self.goal_repository.save_goal(new_goal)
             return new_goal
         except Exception as e:
-            print(f"{e}")
+            raise

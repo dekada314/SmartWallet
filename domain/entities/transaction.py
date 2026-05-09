@@ -6,6 +6,7 @@ from domain.enums.transaction_type import TransactionType
 
 @dataclass(slots=True)
 class Transaction:
+    id: int
     user_id: int
     user_transaction_id: int
     category: str

@@ -4,6 +4,7 @@ from datetime import date, datetime
 
 @dataclass(slots=True)
 class User:
+    id: int
     user_id: str
     user_name: str
     balance: float

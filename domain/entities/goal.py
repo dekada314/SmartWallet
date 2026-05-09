@@ -1,13 +1,16 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from datetime import datetime
 
 
 @dataclass(slots=True)
 class Goal:
+    id: int
     user_id: int
-    user_goal_id: int
+    order_number: int
     target: float
     curr_bill: float
     text: str
+    created_at: datetime = field(default_factory=datetime.now())
 
     def __post_init__(self):
         if self.user_id < 0:

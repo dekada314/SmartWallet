@@ -48,17 +48,17 @@ load_dotenv()
 
 
 async def main():
-    # logger = LogManager()
-    # logger.setup()
+    logger = LogManager()
+    logger.setup()
 
-    user_db = SQLiteUserRepository(settings.SQLITE_USERS)
+    user_db = SQLiteUserRepository(settings.DB)
     await user_db.init_db()
-    transaction_db = SQLiteTransactionRepository(settings.SQLITE_TRANSACTIONS)
+    transaction_db = SQLiteTransactionRepository(settings.DB)
     await transaction_db.init_db()
     categories_kb = YamlCategoriesRepository(settings.YAML_CATEGORIES)
     advices_kb = YamlAdvicesRepository(settings.YAML_ADVICES)
-    goal_db = SqliteGoalsRepository(settings.SQLITE_GOALS)
-    await goal_db._init_db()
+    goal_db = SqliteGoalsRepository(settings.DB)
+    await goal_db.init_db()
 
     text_processing = TextProcessing(
         cat_examples=categories_kb.get_all_categories_examples()

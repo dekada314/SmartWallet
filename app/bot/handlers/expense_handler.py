@@ -10,6 +10,7 @@ from pydantic import ValidationError
 
 from app.bot.keyboards.keyboards import Keyboards
 from app.dto.requests.save_transaction_request import SaveTransactionRequest
+from app.dto.responses.transaction_response import TransactionReponse
 from application.use_cases.add_expense_user_case import AddExpenseUseCase
 from domain.entities.transaction import Transaction
 from infrastructure.external_services.get_categories import GetCategories
@@ -76,19 +77,24 @@ class ExpenseHandler:
         @self.router.message(ExpenseForm.waiting_text_input)
         async def handle_enter_by_text(message: types.Message, state: FSMContext):
             try:
-                transaction_dto = SaveTransactionRequest(
+                transaction_request = SaveTransactionRequest(
                     user_id=message.from_user.id, text=message.text
                 )
 
                 await state.update_data(operation_type="expense")
 
-                transaction = await self.add_expense_us.execute(transaction_dto)
+                transaction_response: TransactionReponse = await self.add_expense_us.execute(transaction_request)
 
-                if transaction:
+                if transaction_response:
                     await message.answer(
-                        _transaction_format(transaction),
+                        _transaction_format(transaction_response.transaction),
                         parse_mode="HTML",
                     )
+                if transaction_response.warnings:
+                    for warning in transaction_response.warnings:
+                        await message.answer(warning)
+                
+                
             except ValidationError:
                 await message.answer("Вы некорректно ввели данные!")
             finally:
@@ -126,20 +132,23 @@ class ExpenseHandler:
             data = await state.get_data()
             user_category = data.get("user_category")
 
-            transaction_dto = SaveTransactionRequest(
+            transaction_response = SaveTransactionRequest(
                 user_id=message.from_user.id, text=amount, category=user_category
             )
 
             await state.update_data(operation_type="expense")
 
-            transaction = await self.add_expense_us.execute(dto=transaction_dto)
+            transaction_response: TransactionReponse = await self.add_expense_us.execute(transaction_response)
 
-            if transaction:
+            if transaction_response:
                 await message.answer(
-                    _transaction_format(transaction),
+                    _transaction_format(transaction_response.transaction),
                     parse_mode="HTML",
                 )
-
+            if transaction_response.warnings:
+                for warning in transaction_response.warnings:
+                    await message.answer(warning)
+                    
             await state.clear()
 
         # ---------------------
@@ -173,11 +182,11 @@ class ExpenseHandler:
             )
 
             file_path = f"assets/receipts/receipt{message.from_user.id}_{document.file_unique_id}.{file_ext}"
-            await message.bot.download_file(file.file_path, destination=file_path)
+            await message.bgot.download_file(file.file_path, destination=file_path)
 
             try:
                 parsed_data = self.receipt_parser.parse_file(file_path)
-                transaction_dto = SaveTransactionRequest(
+                transaction_request = SaveTransactionRequest(
                     user_id=message.from_user.id,
                     text=str(parsed_data["amount"]),
                     category=parsed_data["category"],
@@ -185,14 +194,17 @@ class ExpenseHandler:
 
                 await state.update_data(operation_type="expense")
 
-                transaction: Transaction = await self.add_expense_us.execute(
-                    dto=transaction_dto
-                )
+                transaction_response: TransactionReponse = await self.add_expense_us.execute(transaction_request)
 
-                if transaction:
+                if transaction_response:
                     await message.answer(
-                        _transaction_format(transaction), parse_mode="HTML"
+                        _transaction_format(transaction_response.transaction),
+                        parse_mode="HTML",
                     )
+                if transaction_response.warnings:
+                    for warning in transaction_response.warnings:
+                        await message.answer(warning)
+                    
             except ValidationError:
                 await message.answer("❌ Неверный формат ввода")
                 raise

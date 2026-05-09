@@ -145,10 +145,10 @@ class GoalHandler:
                     f"<b>{index + 1}. {goal.text}\n</b>Ваш прогресс по этой цели:\n",
                     parse_mode="HTML",
                 )
-                
+
                 progress_chart = _progress_donut(goal.curr_bill, goal.target)
                 photo_file = BufferedInputFile(progress_chart.getvalue())
-                
+
                 if photo_file:
                     await callback.message.answer_photo(
                         photo=photo_file,
@@ -199,14 +199,22 @@ class GoalHandler:
                 await callback.message.answer("Вот все ваши цели:")
 
                 for index, goal in enumerate(data):
-                    await state.update_data(goal_text=goal[0])
-
+                    await state.update_data(goal_text=goal.text)
                     await callback.message.answer(
-                        f"<b>{index + 1}. {goal[0]}\n</b>"
-                        f"Ваш прогресс по этой цели:\n\n{progress_bar(goal[2], goal[1])}",
+                        f"<b>{index + 1}. {goal.text}\n</b>Ваш прогресс по этой цели:\n",
                         parse_mode="HTML",
-                        reply_markup=Keyboards.get_update_goal_button(str(goal[3])),
                     )
+
+                    progress_chart = _progress_donut(goal.curr_bill, goal.target)
+                    photo_file = BufferedInputFile(progress_chart.getvalue())
+
+                    if photo_file:
+                        await callback.message.answer_photo(
+                            photo=photo_file,
+                            reply_markup=Keyboards.get_setup_goal_button(
+                                str(goal.user_goal_id)
+                            ),
+                        )
 
         @self.router.callback_query(F.data.startswith("update_goal_"))
         async def update_goal(callback: CallbackQuery, state: FSMContext):

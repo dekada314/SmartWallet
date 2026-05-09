@@ -8,12 +8,13 @@ services:
       - .env
     volumes:
       - ./logs:/bot/logs
+      - ./infrastructure/database/db:/SmartWallet/infrastructure/database/db
     depends_on:
       redis:
         condition: service_healthy
       localai:
         condition: service_healthy
-    restart: unless-stopped
+    restart: unless-stopped 
     networks:
       - bot-network
   redis:
@@ -49,7 +50,7 @@ services:
       - localai-data:/data
     environment:
       - DEBUG=false
-      - CONTEXT_SIZE=512
+      - CONTEXT_SIZE=2048
       - THREADS=4
 
     healthcheck:
