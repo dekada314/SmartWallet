@@ -12,11 +12,11 @@ class DeleteGoalUseCase:
 
     @use_case_logger
     async def execute(self, dto: DelGoalRequest) -> None:
-        if not dto.user_id or not dto.user_goal_id:
+        if not dto.user_id or not dto.order_number:
             return
 
         goal: Goal = await self.goal_repository.get_goal_attrs(
-            dto.user_id, dto.user_goal_id
+            dto.user_id, dto.order_number
         )
 
         await self.goal_repository.delete_goal(goal)

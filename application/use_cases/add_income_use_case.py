@@ -31,11 +31,11 @@ class AddIncomeUseCase:
 
         transaction = Transaction(
             user_id=income_dto.user_id,
-            user_transaction_id=last_user_id + 1,
+            order_number=last_user_id + 1,
             category=None,
             amount=income_dto.amount,
             source_text=None,
-            transaction_type=TransactionType.INCOME,
+            transaction_type=TransactionType.INCOME.value
         )
 
         user.add_amount(income_dto.amount)
