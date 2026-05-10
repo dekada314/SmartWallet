@@ -1,9 +1,10 @@
 import asyncio
 import os
-import sqlite3
 
 from aiogram import Bot, Dispatcher
 from dotenv import load_dotenv
+
+load_dotenv()
 
 import app.config.settings as settings
 from app.bot.handlers.advice_handler import AdviceHandler
@@ -43,8 +44,6 @@ from infrastructure.knowledge_base.implementations.yaml_categories_repository im
     YamlCategoriesRepository,
 )
 from infrastructure.ml.embeddings.text_processing import TextProcessing
-
-load_dotenv()
 
 
 async def main():

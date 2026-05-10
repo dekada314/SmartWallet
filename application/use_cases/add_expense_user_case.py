@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, time
 
 from app.core.logs_config.logger_wrappers import use_case_logger
 from app.dto.requests.save_transaction_request import SaveTransactionRequest
@@ -38,7 +38,7 @@ class AddExpenseUseCase:
             source_text = None
         else:
             amount: float = self.text_processing.extract_amount(dto.text)
-            cat, _ = self.text_processing.classifier(dto.text)
+            cat, _ = await self.text_processing.classifier(dto.text)
             output_category = cat
             source_text = dto.text
 
@@ -46,7 +46,7 @@ class AddExpenseUseCase:
 
         transaction = Transaction(
             user_id=dto.user_id,
-            user_transaction_id=last_user_id + 1,
+            order_number=last_user_id + 1,
             category=output_category,
             amount=amount,
             source_text=source_text,
@@ -59,12 +59,17 @@ class AddExpenseUseCase:
         if rules:
             day_of_week = datetime.now().weekday()
             current_time = datetime.now().time()
-            limit_time = datetime.time(23, 0)
+            limit_time = time(23, 0)
             category_limit = self.categories_repository.get_waste_for_cat(transaction.category)
             
             for rule in rules:
-                if eval(rule.get("condition", "")):
-                    hints_for_user.append(rule.get("text", "Даже и посоветовать нечего)"))     
+                condition = rule.get("condition", "")
+                if condition:
+                    try:            
+                        if eval(condition, {"__bulidins__": {}}, {...}):
+                            hints_for_user.append(rule.get("text", "Даже и посоветовать нечего)"))     
+                    except Exception:
+                        pass
         try:
             await self.transaction_repositry.save_transaction(transaction)
             await self.user_repository.update_balance(

@@ -4,13 +4,13 @@ from datetime import datetime
 
 @dataclass(slots=True)
 class Goal:
-    id: int
     user_id: int
     order_number: int
     target: float
     curr_bill: float
     text: str
-    created_at: datetime = field(default_factory=datetime.now())
+    created_at: datetime = field(default_factory=datetime.now)
+    id: int | None = None
 
     def __post_init__(self):
         if self.user_id < 0:
@@ -28,4 +28,6 @@ class Goal:
         return self.curr_bill >= self.target
 
     def get_progress(self) -> str:
-        return f"{self.curr_bill / self.target:.1}%"
+        if self.target == 0:
+            return "Цель не создана"
+        return f"{self.curr_bill / self.target * 100:.1f}%"

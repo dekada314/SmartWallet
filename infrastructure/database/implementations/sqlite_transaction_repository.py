@@ -15,7 +15,7 @@ class SQLiteTransactionRepository(BaseTransactionRepository):
 
     async def _get_db(self):
         if self._db is None:
-            self._db = aiosqlite.connect(self.db_path)
+            self._db = await aiosqlite.connect(self.db_path)
             self._db.row_factory = aiosqlite.Row
 
             await self._db.execute("PRAGMA foreign_keys=ON")
@@ -41,11 +41,11 @@ class SQLiteTransactionRepository(BaseTransactionRepository):
                 
                 created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
                 
-                FOREIGN KEY(user_id) REFERENCES users(user_id) DELETE CASCADE,
+                FOREIGN KEY(user_id) REFERENCES users(user_id) ON DELETE CASCADE
         );
     """)
         await db.execute(
-            "CREATE INDEX IF NOT EXISTS index_user_order_id(user_id, order_number);"
+            "CREATE INDEX IF NOT EXISTS index_user_order_number ON transactions(user_id, order_number)"
         )
 
         await db.commit()
@@ -62,14 +62,15 @@ class SQLiteTransactionRepository(BaseTransactionRepository):
         return row[0] if row[0] else 0
 
     @repository_logger
-    async def save_transaction(self, transaction: Transaction) -> None:
+    async def save_transaction(self, transaction: Transaction) -> None: # исправить это чудо
         values = astuple(transaction)[:-2] + (
             transaction.transaction_type.value,
             transaction.created_at.strftime("%Y-%m-%d %H:%M:%S"),
         )
         db = await self._get_db()
         await db.execute(
-            "INSERT OR REPLACE INTO transactions(user_id, order_number, category, amount, source_text, transaction_type, created_at) VALUES(?, ?, ?, ?, ?, ?, ?)",
+            "INSERT OR REPLACE INTO transactions(id, user_id, order_number, category, amount, source_text, transaction_type, created_at) \
+            VALUES(?, ?, ?, ?, ?, ?, ?, ?)",
             values,
         )
         await db.commit()

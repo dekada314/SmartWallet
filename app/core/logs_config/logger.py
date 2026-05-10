@@ -12,13 +12,13 @@ os.makedirs(LOG_DIR, exist_ok=True)
 
 
 class LogManager:
-    _instanсe: None | LogManager = None
+    _instance: None | LogManager = None
     _initialized = False
 
     def __new__(cls):
-        if cls._instanсe is None:
-            cls._instanсe = super().__new__(cls)
-        return cls._instanсe
+        if cls._instance is None:
+            cls._instance = super().__new__(cls)
+        return cls._instance
 
     def _add_corelation_id(self, _, __, event_dict):
         event_dict["corelation_id"] = CorrelationContext.get()
@@ -43,7 +43,7 @@ class LogManager:
                 self._add_corelation_id,
                 structlog.stdlib.filter_by_level,
                 structlog.stdlib.add_logger_name,
-                structlog.stdlib.ProcessorFormatter.wrap_for_formatter,
+                # structlog.stdlib.ProcessorFormatter.wrap_for_formatter,
                 structlog.processors.TimeStamper(fmt="iso"),
                 structlog.dev.ConsoleRenderer(),
             ],

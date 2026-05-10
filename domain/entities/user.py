@@ -1,15 +1,14 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import date, datetime
 
 
 @dataclass(slots=True)
 class User:
-    id: int
-    user_id: str
+    user_id: int
     user_name: str
     balance: float
     created_at: date
-    last_action: date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    last_action: str = field(default_factory=lambda: datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
 
     def __post_init__(self):
         if self.user_id < 0:

@@ -25,4 +25,4 @@ class UpdateGoalUseCase:
             return is_goal_achieved
 
         except ValueError:
-            print("Ввод должен быть неотрицательным")
+            raise

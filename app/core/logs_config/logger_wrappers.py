@@ -16,16 +16,17 @@ def use_case_logger(func):
         )
 
         try:
-            await func(*args, **kwargs)
+            result = await func(*args, **kwargs)
         except Exception as e:
             _main_logger.exception(
-                f"[USE CASE] В работе {class_name}.{method_name} произошка ошибка {e}",
+                f"[USE CASE] В работе {class_name}.{method_name} произошла ошибка {e}",
             )
             raise
         else:
             _main_logger.info(
                 f"[USE CASE] {class_name}.{method_name} успешно отработал"
             )
+            return result
 
     return wrapper
 
@@ -41,16 +42,17 @@ def repository_logger(func):
         )
 
         try:
-            await func(*args, **kwargs)
+            result = await func(*args, **kwargs)
         except Exception as e:
             _main_logger.exception(
-                f"[REPOSITORY] В работе {class_name}.{method_name} произошка ошибка {e}",
+                f"[REPOSITORY] В работе {class_name}.{method_name} произошла ошибка {e}",
             )
             raise
         else:
             _main_logger.info(
                 f"[REPOSITORY] {class_name}.{method_name} успешно отработал"
             )
+            return result
 
     return wrapper
 
@@ -66,13 +68,14 @@ def service_logger(func):
         )
 
         try:
-            await func(*args, **kwargs)
+            result = await func(*args, **kwargs)
         except Exception as e:
             _main_logger.exception(
-                f"[SERVICE] В работе {class_name}.{method_name} произошка ошибка {e}",
+                f"[SERVICE] В работе {class_name}.{method_name} произошла ошибка {e}",
             )
             raise
         else:
             _main_logger.info(f"[SERVICE] {class_name}.{method_name} успешно отработал")
+            return result
 
     return wrapper

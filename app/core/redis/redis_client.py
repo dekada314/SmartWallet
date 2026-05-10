@@ -10,7 +10,7 @@ class RedisClient:
     _app_logger = LogManager().get_logger("app")
 
     @classmethod
-    async def get_client(cls) -> RedisClient:
+    async def get_client(cls) -> Redis:
         if cls._instance is None:
             redis_url = redis_config.get_url()
             try:

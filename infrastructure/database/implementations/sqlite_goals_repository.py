@@ -27,35 +27,35 @@ class SqliteGoalsRepository(BaseGoalsRepository):
     @repository_logger
     async def init_db(self) -> None:
         db = await self._get_db()
-        async with aiosqlite.connect(self.db_path) as db:
-            await db.execute("""
-                CREATE TABLE IF NOT EXISTS goals(
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    
-                    user_id INTEGER NOT NULL,
-                    order_number INTEGER NOT NULL,
-                    
-                    text TEXT,
-                    target FLOAT DEFAULT 0,
-                    curr_bill FLOAT DEFAULT 0,
-                    
-                    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-                    
-                    
-                    FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE,
-                    
-                    UNIQUE(user_id, order_number)
-                );
-            """)
+        
+        await db.execute("""
+            CREATE TABLE IF NOT EXISTS goals(
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                
+                user_id INTEGER NOT NULL,
+                order_number INTEGER NOT NULL,
+                
+                text TEXT,
+                target FLOAT DEFAULT 0,
+                curr_bill FLOAT DEFAULT 0,
+                
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                
+                
+                FOREIGN KEY(user_id) REFERENCES users(user_id) ON DELETE CASCADE,
+                
+                UNIQUE(user_id, order_number)
+            );
+        """)
 
-            await db.execute(
-                "CREATE INDEX IF NOT EXISTS index_goals_user_orders ON goals(user_id, order_number);"
-            )
+        await db.execute(
+            "CREATE INDEX IF NOT EXISTS index_goals_user_orders ON goals(user_id, order_number);"
+        )
 
-            await db.commit()
+        await db.commit()
 
     @repository_logger
-    async def get_last_id(self, user_id: int) -> int:
+    async def get_order_number_for_user(self, user_id: int) -> int:
         db = await self._get_db()
         cursor = await db.execute(
             "SELECT MAX(order_number) AS last_num FROM goals WHERE user_id = ?",

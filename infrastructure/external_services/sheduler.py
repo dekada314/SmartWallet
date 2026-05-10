@@ -23,10 +23,15 @@ class APSCheduler:
         for user in users_id:
             user_goals = await self.db.get_all_user_goals(user)
             output = "Напоминаю о ваших целях:\n\n"
-            for index, data in enumerate(user_goals):
-                output += (
-                    f"<b>{index}. {data[0]}: {data[2] / data[1] * 100:.1f}к%</b>\n"
-                )
+            for index, goal in enumerate(user_goals):
+                if goal.target > 0:
+                    output += (
+                        f"<b>{index + 1}. {goal.text}: {goal.curr_bill / goal.target * 100:.1f}%</b>\n"
+                    )
+                else:
+                    output += (
+                        f"<b>{index + 1}. {goal.text}: цель на задана "
+                    )
             await self._send_message(user, output)
 
     async def _send_message(self, user_id: int, text: str):

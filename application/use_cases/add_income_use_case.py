@@ -29,7 +29,7 @@ class AddIncomeUseCase:
             income_dto.user_id
         )
 
-        new_income_transaction = Transaction(
+        transaction = Transaction(
             user_id=income_dto.user_id,
             user_transaction_id=last_user_id + 1,
             category=None,
@@ -39,9 +39,9 @@ class AddIncomeUseCase:
         )
 
         user.add_amount(income_dto.amount)
-        user.update_last_action()
+        await self.user_repository.update_balance(user.user_id, transaction.amount)
+        await self.user_repository.update_last_action(user.user_id)
 
-        await self.user_repository.save_user(user)
-        await self.transction_repository.save_transaction(new_income_transaction)
+        await self.transction_repository.save_transaction(transaction)
 
         return user.balance

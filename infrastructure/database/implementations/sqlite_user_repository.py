@@ -1,3 +1,4 @@
+from dataclasses import asdict
 from datetime import datetime
 
 import aiosqlite
@@ -17,7 +18,7 @@ class SQLiteUserRepository(BaseUserRepository):
             self._db = await aiosqlite.connect(self.db_path)
             self._db.row_factory = aiosqlite.Row
 
-            await self._db.execute("PRAGMA foreigh_keys=ON")
+            await self._db.execute("PRAGMA foreign_keys=ON")
             await self._db.execute("PRAGMA journal_mode=WAL")
             await self._db.execute("PRAGMA synchronous=NORMAL")
             await self._db.execute("PRAGMA cache_size=-64000")
@@ -44,14 +45,9 @@ class SQLiteUserRepository(BaseUserRepository):
     async def save_user(self, user: User) -> None:
         db = await self._get_db()
         await db.execute(
-            "INSERT OR REPLACE INTO users(user_id, user_name, balance, created_at, last_action) VALUES (?, ?, ?, ?, ?)",
-            (
-                user.user_id,
-                user.user_name,
-                user.balance,
-                user.created_at,
-                user.last_action,
-            ),
+            "INSERT OR REPLACE INTO users(user_id, user_name, balance, created_at, last_action) \
+            VALUES (:user_id, :user_name, :balance, :created_at, :last_action)",
+            asdict(user)
         )
 
         await db.commit()
@@ -85,7 +81,7 @@ class SQLiteUserRepository(BaseUserRepository):
         await db.commit()
 
     @repository_logger
-    async def update_balance(self, user_id: int, delta: int | float):
+    async def update_balance(self, user_id: int, delta: int | float) -> None:
         db = await self._get_db()
         await db.execute(
             "UPDATE users SET balance = balance + ? WHERE user_id = ?",
