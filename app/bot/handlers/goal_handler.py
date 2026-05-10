@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from aiogram import F, Router, types
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
-from aiogram.types import CallbackQuery, BufferedInputFile
+from aiogram.types import BufferedInputFile, CallbackQuery
 
 from app.bot.keyboards.keyboards import Keyboards
 from app.bot.middleware.goal_middleware import GoalMiddleware
@@ -147,23 +147,23 @@ class GoalHandler:
                 )
 
                 progress_chart = _progress_donut(goal.curr_bill, goal.target)
-                photo_file = BufferedInputFile(progress_chart.getvalue())
+                photo_file = BufferedInputFile(progress_chart.getvalue(), "Прогресс по цели")
 
                 if photo_file:
                     await callback.message.answer_photo(
                         photo=photo_file,
                         reply_markup=Keyboards.get_setup_goal_button(
-                            str(goal.user_goal_id)
+                            str(goal.order_number)
                         ),
                     )
 
         @self.router.callback_query(F.data.startswith("del_goal_"))
         async def handle_delete_goal(callback: CallbackQuery):
             await callback.answer()
-            user_goal_id = int(callback.data.split("del_goal_")[1])
+            order_number = int(callback.data.split("del_goal_")[1])
 
             del_goal_request = DelGoalRequest(
-                user_id=callback.from_user.id, user_goal_id=user_goal_id
+                user_id=callback.from_user.id, order_number=order_number
             )
 
             goal = await self.delete_goal_us.execute(del_goal_request)
@@ -174,16 +174,16 @@ class GoalHandler:
         @self.router.callback_query(F.data.startswith("update_desc_"))
         async def handle_change_desc(callback: CallbackQuery, state: FSMContext):
             await callback.answer()
-            user_goal_id = int(callback.data.split("update_desc_")[1])
-            await state.update_data(user_goal_id=user_goal_id)
+            order_number = int(callback.data.split("update_desc_")[1])
+            await state.update_data(order_number=order_number)
             await callback.message.answer("Введите новое описание цели:")
             await state.set_state(GoalForm.waiting_for_new_desc)
 
         @self.router.message(GoalForm.waiting_for_new_desc)
         async def change_desc(message: types.Message, state: FSMContext):
             data = await state.get_data()
-            user_goal_id = data.get("user_goal_id")
-            goal = await self.change_goal_us.execute(message, user_goal_id)
+            order_number = data.get("order_number")
+            goal = await self.change_goal_us.execute(message, order_number)
             if goal:
                 await message.answer("Описание цели было успешно изменено!")
             await state.clear()
@@ -206,13 +206,13 @@ class GoalHandler:
                     )
 
                     progress_chart = _progress_donut(goal.curr_bill, goal.target)
-                    photo_file = BufferedInputFile(progress_chart.getvalue())
+                    photo_file = BufferedInputFile(progress_chart.getvalue(), "Прогресс по цели")
 
                     if photo_file:
                         await callback.message.answer_photo(
                             photo=photo_file,
-                            reply_markup=Keyboards.get_setup_goal_button(
-                                str(goal.user_goal_id)
+                            reply_markup=Keyboards.get_update_goal_button(
+                                str(goal.order_number)
                             ),
                         )
 

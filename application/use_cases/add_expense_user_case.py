@@ -50,23 +50,26 @@ class AddExpenseUseCase:
             category=output_category,
             amount=amount,
             source_text=source_text,
-            transaction_type=TransactionType.EXPENSE,
+            transaction_type=TransactionType.EXPENSE.value,
         )
         
         rules = self.categories_repository.get_categories_rules(transaction.category)
-        
         hints_for_user = []
         if rules:
-            day_of_week = datetime.now().weekday()
-            current_time = datetime.now().time()
-            limit_time = time(23, 0)
-            category_limit = self.categories_repository.get_waste_for_cat(transaction.category)
+            context = {
+                "transaction": transaction,
+                "user": user,
+                "day_of_week":datetime.now().weekday(),
+                "current_time": datetime.now().time(),
+                "limit_time": time(23, 0),
+                "category_limit": self.categories_repository.get_waste_for_cat(transaction.category)
+            }
             
             for rule in rules:
                 condition = rule.get("condition", "")
                 if condition:
                     try:            
-                        if eval(condition, {"__bulidins__": {}}, {...}):
+                        if eval(condition, {"__builtins__": {}}, context):
                             hints_for_user.append(rule.get("text", "Даже и посоветовать нечего)"))     
                     except Exception:
                         pass

@@ -1,4 +1,4 @@
-from dataclasses import astuple
+from dataclasses import asdict
 from datetime import datetime
 
 import aiosqlite
@@ -63,15 +63,11 @@ class SQLiteTransactionRepository(BaseTransactionRepository):
 
     @repository_logger
     async def save_transaction(self, transaction: Transaction) -> None: # исправить это чудо
-        values = astuple(transaction)[:-2] + (
-            transaction.transaction_type.value,
-            transaction.created_at.strftime("%Y-%m-%d %H:%M:%S"),
-        )
         db = await self._get_db()
         await db.execute(
             "INSERT OR REPLACE INTO transactions(id, user_id, order_number, category, amount, source_text, transaction_type, created_at) \
-            VALUES(?, ?, ?, ?, ?, ?, ?, ?)",
-            values,
+            VALUES(:id, :user_id, :order_number, :category, :amount, :source_text, :transaction_type, :created_at)",
+            asdict(transaction)
         )
         await db.commit()
 
@@ -125,12 +121,3 @@ class SQLiteTransactionRepository(BaseTransactionRepository):
         async for row in cursor:
             transactions.append(Transaction(**dict(row)))
         return transactions
-
-    # @repository_logger
-    # async def get_rule_for_situation(self, condition: str) -> int:
-    #     db = await self._get_db()
-    #     cursor = await db.execute(
-    #         f"SELECT COUNT(order_number) FROM transactions AS tr JOIN users AS us ON (tr.user_id = us.user_id) {condition}",
-    #     )
-    #     data = await cursor.fetchone()
-    #     return data[0] if data[0] else 0

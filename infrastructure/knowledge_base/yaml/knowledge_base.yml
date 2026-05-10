@@ -750,6 +750,11 @@ rules:
       condition: "day_of_week in [5, 6] and transaction.category == 'entertainment' and transaction.amount > 100"
       text: "🎉 Выходные удались! Но следи за балансом, чтобы понедельник не стал 'черным' днем для кошелька."
 
+  technic:
+    - id: "weekend_party_alert"
+      condition: "transaction.category == 'technic' and transaction.amount > 500"
+      text: "🎉 Ого какая покупка! Новая техника это здорово, но не забывай, что кушать тоже надо."
+
   education:
     - id: "education_investment"
       condition: "transaction.category == 'education' and transaction.amount > 50"
