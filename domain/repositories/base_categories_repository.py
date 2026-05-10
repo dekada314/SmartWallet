@@ -13,3 +13,6 @@ class BaseCategoriesRepositry(ABC):
 
     @abstractmethod
     def get_waste_for_cat(self, cat_name: str) -> int: ...
+
+    @abstractmethod
+    def get_category_name_by_id(self, category_name: str) -> str: ...

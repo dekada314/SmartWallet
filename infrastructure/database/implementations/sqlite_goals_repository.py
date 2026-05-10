@@ -27,7 +27,7 @@ class SqliteGoalsRepository(BaseGoalsRepository):
     @repository_logger
     async def init_db(self) -> None:
         db = await self._get_db()
-        
+
         await db.execute("""
             CREATE TABLE IF NOT EXISTS goals(
                 id INTEGER PRIMARY KEY AUTOINCREMENT,

@@ -83,7 +83,9 @@ class ExpenseHandler:
 
                 await state.update_data(operation_type="expense")
 
-                transaction_response: TransactionReponse = await self.add_expense_us.execute(transaction_request)
+                transaction_response: TransactionReponse = (
+                    await self.add_expense_us.execute(transaction_request)
+                )
 
                 if transaction_response:
                     await message.answer(
@@ -93,8 +95,7 @@ class ExpenseHandler:
                 if transaction_response.warnings:
                     for warning in transaction_response.warnings:
                         await message.answer(warning)
-                
-                
+
             except ValidationError:
                 await message.answer("Вы некорректно ввели данные!")
             finally:
@@ -138,7 +139,9 @@ class ExpenseHandler:
 
             await state.update_data(operation_type="expense")
 
-            transaction_response: TransactionReponse = await self.add_expense_us.execute(transaction_response)
+            transaction_response: TransactionReponse = (
+                await self.add_expense_us.execute(transaction_response)
+            )
 
             if transaction_response:
                 await message.answer(
@@ -148,7 +151,7 @@ class ExpenseHandler:
             if transaction_response.warnings:
                 for warning in transaction_response.warnings:
                     await message.answer(warning)
-                    
+
             await state.clear()
 
         # ---------------------
@@ -175,6 +178,8 @@ class ExpenseHandler:
 
         @self.router.message(ExpenseForm.waiting_for_doc_input, F.document)
         async def handle_enter_by_file(message: types.Message, state: FSMContext):
+            await message.answer("Пока не реализовано")
+            return
             document = message.document
             file = await message.bot.get_file(document.file_id)
             file_ext = (
@@ -182,7 +187,7 @@ class ExpenseHandler:
             )
 
             file_path = f"assets/receipts/receipt{message.from_user.id}_{document.file_unique_id}.{file_ext}"
-            await message.bgot.download_file(file.file_path, destination=file_path)
+            await message.bot.download_file(file.file_path, destination=file_path)
 
             try:
                 parsed_data = self.receipt_parser.parse_file(file_path)
@@ -194,7 +199,9 @@ class ExpenseHandler:
 
                 await state.update_data(operation_type="expense")
 
-                transaction_response: TransactionReponse = await self.add_expense_us.execute(transaction_request)
+                transaction_response: TransactionReponse = (
+                    await self.add_expense_us.execute(transaction_request)
+                )
 
                 if transaction_response:
                     await message.answer(
@@ -204,7 +211,7 @@ class ExpenseHandler:
                 if transaction_response.warnings:
                     for warning in transaction_response.warnings:
                         await message.answer(warning)
-                    
+
             except ValidationError:
                 await message.answer("❌ Неверный формат ввода")
                 raise

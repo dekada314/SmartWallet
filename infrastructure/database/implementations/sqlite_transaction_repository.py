@@ -62,17 +62,17 @@ class SQLiteTransactionRepository(BaseTransactionRepository):
         return row[0] if row[0] else 0
 
     @repository_logger
-    async def save_transaction(self, transaction: Transaction) -> None: # исправить это чудо
+    async def save_transaction(self, transaction: Transaction) -> None:
         db = await self._get_db()
         await db.execute(
             "INSERT OR REPLACE INTO transactions(id, user_id, order_number, category, amount, source_text, transaction_type, created_at) \
             VALUES(:id, :user_id, :order_number, :category, :amount, :source_text, :transaction_type, :created_at)",
-            asdict(transaction)
+            asdict(transaction),
         )
         await db.commit()
 
     @repository_logger
-    async def delete_by_transaction_id(self, user_id, order_number: int) -> None:
+    async def delete_by_transaction_id(self, user_id: int, order_number: int) -> None:
         db = await self._get_db()
         await db.execute(
             "DELETE FROM transactions WHERE user_id = ? AND order_number = ?",
@@ -83,7 +83,7 @@ class SQLiteTransactionRepository(BaseTransactionRepository):
 
     @repository_logger
     async def get_transaction_by_transaction_id(
-        self, user_id, order_number: int
+        self, user_id: int, order_number: int
     ) -> Transaction | None:
         db = await self._get_db()
         db.row_factory = aiosqlite.Row

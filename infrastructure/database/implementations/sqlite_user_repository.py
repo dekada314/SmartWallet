@@ -47,7 +47,7 @@ class SQLiteUserRepository(BaseUserRepository):
         await db.execute(
             "INSERT OR REPLACE INTO users(user_id, user_name, balance, created_at, last_action) \
             VALUES (:user_id, :user_name, :balance, :created_at, :last_action)",
-            asdict(user)
+            asdict(user),
         )
 
         await db.commit()

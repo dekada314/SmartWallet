@@ -35,7 +35,7 @@ class AddIncomeUseCase:
             category=None,
             amount=income_dto.amount,
             source_text=None,
-            transaction_type=TransactionType.INCOME.value
+            transaction_type=TransactionType.INCOME.value,
         )
 
         user.add_amount(income_dto.amount)

@@ -14,7 +14,9 @@ class SaveGoalUseCase:
     @use_case_logger
     async def execute(self, dto: SaveGoalRequest) -> User:
         user_id = dto.user_id
-        last_user_goal_id = await self.goal_repository.get_order_number_for_user(user_id)
+        last_user_goal_id = await self.goal_repository.get_order_number_for_user(
+            user_id
+        )
         try:
             new_goal = Goal(user_id, last_user_goal_id + 1, dto.amount, 0, dto.text)
             await self.goal_repository.save_goal(new_goal)

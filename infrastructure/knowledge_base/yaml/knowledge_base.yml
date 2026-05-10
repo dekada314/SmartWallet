@@ -711,6 +711,11 @@ rules:
       condition: "day_of_month > 25 and user.balance > 150"
       text: "🌟 Ого! Конец месяца, а у тебя еще солидный запас. Ты настоящий мастер финансового планирования!"
 
+  food: 
+    - id: "huge_products_price"
+      condition: "transaction.category == 'food' and transaction.amount > 100"
+      text: "Ничего себе вы ненасытные!"
+
   addiction:
     - id: "addiction_control"
       condition: "transaction.category == 'addiction' and transaction.amount > 10"

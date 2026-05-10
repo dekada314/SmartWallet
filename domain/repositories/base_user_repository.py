@@ -15,6 +15,6 @@ class BaseUserRepository(ABC):
 
     @abstractmethod
     async def update_last_action(self, user_id: int) -> None: ...
-    
+
     @abstractmethod
     async def update_balance(self, user_id: int, delta: int | float) -> None: ...

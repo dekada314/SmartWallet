@@ -27,7 +27,9 @@ class AddExpenseUseCase:
         self.text_processing = text_processing_unit
 
     @use_case_logger
-    async def execute(self, dto: SaveTransactionRequest) -> tuple[Transaction, list[str]] | None:
+    async def execute(
+        self, dto: SaveTransactionRequest
+    ) -> tuple[Transaction, list[str]] | None:
         user: User = await self.user_repository.get_user_by_user_id(dto.user_id)
         if not user:
             raise GettingUserError
@@ -52,25 +54,29 @@ class AddExpenseUseCase:
             source_text=source_text,
             transaction_type=TransactionType.EXPENSE.value,
         )
-        
+
         rules = self.categories_repository.get_categories_rules(transaction.category)
         hints_for_user = []
         if rules:
             context = {
                 "transaction": transaction,
                 "user": user,
-                "day_of_week":datetime.now().weekday(),
+                "day_of_week": datetime.now().weekday(),
                 "current_time": datetime.now().time(),
                 "limit_time": time(23, 0),
-                "category_limit": self.categories_repository.get_waste_for_cat(transaction.category)
+                "category_limit": self.categories_repository.get_waste_for_cat(
+                    transaction.category
+                ),
             }
-            
+
             for rule in rules:
                 condition = rule.get("condition", "")
                 if condition:
-                    try:            
+                    try:
                         if eval(condition, {"__builtins__": {}}, context):
-                            hints_for_user.append(rule.get("text", "Даже и посоветовать нечего)"))     
+                            hints_for_user.append(
+                                rule.get("text", "Даже и посоветовать нечего)")
+                            )
                     except Exception:
                         pass
         try:
@@ -81,5 +87,8 @@ class AddExpenseUseCase:
             await self.user_repository.update_last_action(transaction.user_id)
         except:
             raise
-
+        transaction.category = self.categories_repository.get_category_name_by_id(
+            transaction.category
+        )
+        print(transaction)
         return TransactionReponse(transaction=transaction, warnings=hints_for_user)

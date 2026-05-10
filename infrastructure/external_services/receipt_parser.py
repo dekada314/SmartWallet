@@ -43,8 +43,6 @@ class ReceiptParser:
 
     def _extract_text_from_image(self, file_path):
         """Извлечение текста из картинки (OCR)"""
-        # Если ты на Windows, раскомментируй строку ниже и укажи путь к tesseract.exe
-        # pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
         image = Image.open(file_path)
         return pytesseract.image_to_string(image, lang="rus+eng")
 
@@ -58,24 +56,20 @@ class ReceiptParser:
             "category": "unknown",
         }
 
-        # Очистка текста от лишних кавычек и переносов, которые бывают в PDF
         clean_text = text.replace('"', "").replace("\r", "")
 
-        # 1. Поиск суммы
         amount_match = re.search(r"Сумма\s*(\d+[.,]\d{2})\s*BYN", clean_text)
-        if not amount_match:  # Запасной вариант
+        if not amount_match:
             amount_match = re.search(r"(\d+[.,]\d{2})\s*BYN", clean_text)
 
         if amount_match:
             result["amount"] = float(amount_match.group(1).replace(",", "."))
 
-        # 2. Поиск магазина (после 'Наименование получателя')
         merchant_match = re.search(r"Наименование получателя\s*(.*)", clean_text)
         if merchant_match:
             result["merchant"] = merchant_match.group(1).strip()
             result["category"] = self._get_category(result["merchant"])
 
-        # 3. Поиск даты
         date_match = re.search(r"(\d{2}\.\d{2}\.\d{4}\s\d{2}:\d{2}:\d{2})", clean_text)
         if date_match:
             result["date"] = date_match.group(1)

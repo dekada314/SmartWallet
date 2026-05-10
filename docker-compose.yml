@@ -9,6 +9,7 @@ services:
     volumes:
       - ./logs:/bot/logs
       - ./infrastructure/database/db:/bot/infrastructure/database/db
+      - embeddings-data:/bot/infrastructure/ml/embeddings
     depends_on:
       redis:
         condition: service_healthy
@@ -71,3 +72,4 @@ volumes:
   localai-models:
   localai-cache:
   localai-data:
+  embeddings-data:

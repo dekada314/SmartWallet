@@ -25,13 +25,9 @@ class APSCheduler:
             output = "Напоминаю о ваших целях:\n\n"
             for index, goal in enumerate(user_goals):
                 if goal.target > 0:
-                    output += (
-                        f"<b>{index + 1}. {goal.text}: {goal.curr_bill / goal.target * 100:.1f}%</b>\n"
-                    )
+                    output += f"<b>{index + 1}. {goal.text}: {goal.curr_bill / goal.target * 100:.1f}%</b>\n"
                 else:
-                    output += (
-                        f"<b>{index + 1}. {goal.text}: цель на задана "
-                    )
+                    output += f"<b>{index + 1}. {goal.text}: цель на задана "
             await self._send_message(user, output)
 
     async def _send_message(self, user_id: int, text: str):

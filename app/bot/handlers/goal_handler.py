@@ -147,7 +147,9 @@ class GoalHandler:
                 )
 
                 progress_chart = _progress_donut(goal.curr_bill, goal.target)
-                photo_file = BufferedInputFile(progress_chart.getvalue(), "Прогресс по цели")
+                photo_file = BufferedInputFile(
+                    progress_chart.getvalue(), "Прогресс по цели"
+                )
 
                 if photo_file:
                     await callback.message.answer_photo(
@@ -206,7 +208,9 @@ class GoalHandler:
                     )
 
                     progress_chart = _progress_donut(goal.curr_bill, goal.target)
-                    photo_file = BufferedInputFile(progress_chart.getvalue(), "Прогресс по цели")
+                    photo_file = BufferedInputFile(
+                        progress_chart.getvalue(), "Прогресс по цели"
+                    )
 
                     if photo_file:
                         await callback.message.answer_photo(
