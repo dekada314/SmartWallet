@@ -33,12 +33,7 @@ class StatisticsMiddleware(BaseMiddleware):
         try:
             token = await self._tokenizer.get_token(user_id=user_id)
             if isinstance(event, Message) and event.text == "Статистика":
-                self._main_log.info(
-                    "[STATS] Вход в блок статистики",
-                    extra={
-                        "user_id": token,
-                    },
-                )
+                self._main_log.info("[STATS] Вход в блок статистики", user_id=token)
                 result = await handler(event, data)
                 duration_time = datetime.now() - start_time
 
@@ -49,8 +44,7 @@ class StatisticsMiddleware(BaseMiddleware):
                 "per_year",
             ]:
                 self._main_log.info(
-                    f"[STATS] Обработка запроса {event.data}",
-                    extra={"user_id": token},
+                    f"[STATS] Обработка запроса {event.data}", user_id=token
                 )
 
                 result = await handler(event, data)
@@ -61,32 +55,21 @@ class StatisticsMiddleware(BaseMiddleware):
 
         except ValidationError:
             self._main_log.error(
-                "[STATS] Ошибка валидации параметров статистики",
-                extra={
-                    "user_id": token,
-                },
+                "[STATS] Ошибка валидации параметров статистики", user_id=token
             )
 
         except TelegramAPIError:
             self._tg_api_logger.error(
-                f"[TG_API] Ошибка при обращение к API телеграмма",
-                extra={"user_id": token},
+                f"[TG_API] Ошибка при обращение к API телеграмма", user_id=token
             )
         except Exception:
-            self._main_log.error(
-                f"[STATS] Ошибка работы со статистикой",
-                extra={
-                    "user_id": token,
-                },
-            )
+            self._main_log.error(f"[STATS] Ошибка работы со статистикой", user_id=token)
             raise
         else:
             self._main_log.info(
                 "[STATS] Статисика успешно отображена",
-                extra={
-                    "user_id": token,
-                    "duration_time": duration_time,
-                },
+                user_id=token,
+                duration_time=duration_time,
             )
             return result
         finally:

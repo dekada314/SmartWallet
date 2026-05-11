@@ -43,7 +43,7 @@ ontology:
       is_essential: false
       priority: 5
     - id: "shopping"
-      name: "Одежда и обувь"
+      name: "Шопинг"
       is_essential: false
       priority: 3
     - id: "technic"
@@ -744,6 +744,11 @@ rules:
     - id: "subscription_trap"
       condition: "transaction.category == 'digital_services' and transaction.amount > 20"
       text: "🎧 Заметил крупную подписку. Проверь список активных сервисов — часто мы платим за то, чем уже не пользуемся."
+
+  shopping:
+    - id: "huge_shopping_session"
+      condition: "transaction.category == 'shopping' and transaction.amount > 500"
+      text: "Кажется, кто-то перепутал лимит карты с номером телефона. 💳🔥"
 
   transport:
     - id: "taxi_vs_transport"

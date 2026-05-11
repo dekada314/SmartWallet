@@ -27,41 +27,32 @@ class GoalMiddleware(BaseMiddleware):
     ) -> None:
         corr_context = CorrelationContext.set()
         token = None
+        duration_time = None
         try:
             start_time = datetime.now()
             token = await self._tokenizer.get_token(user_id=event.from_user.id)
             if isinstance(event, Message) and event.text == "Цели":
-                self._main_log.info(
-                    "[GOAL] Вход в рездел целей", extra={"user_id": token}
-                )
+                self._main_log.info("[GOAL] Вход в рездел целей", user_id=token)
             result = await handler(event, data)
             duration_time = datetime.now() - start_time
         except ValidationError:
             self._main_log.error(
-                "[GOAL] Ошибка валидации параметров цели",
-                extra={
-                    "user_id": token,
-                },
+                "[GOAL] Ошибка валидации параметров цели", user_id=token
             )
 
         except TelegramAPIError:
             self._tg_api_log.error(
-                f"[TG_API] Ошибка при обращении к API телеграмма",
-                extra={"user_id": token},
+                f"[TG_API] Ошибка при обращении к API телеграмма", user_id=token
             )
         except Exception:
-            self._main_log.error(
-                f"[GOAL] Ошибка обработки целей",
-                extra={
-                    "user_id": token,
-                },
-            )
+            self._main_log.error(f"[GOAL] Ошибка обработки целей", user_id=token)
             raise
 
         else:
             self._main_log.info(
                 "[GOAL] Обработка целей закончена успешно",
-                extra={"user_id": token, "duration_time": duration_time},
+                user_id=token,
+                duration_time=duration_time,
             )
             return result
 

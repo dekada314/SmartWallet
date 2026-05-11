@@ -90,5 +90,4 @@ class AddExpenseUseCase:
         transaction.category = self.categories_repository.get_category_name_by_id(
             transaction.category
         )
-        print(transaction)
         return TransactionReponse(transaction=transaction, warnings=hints_for_user)

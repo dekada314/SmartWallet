@@ -21,9 +21,11 @@ venv/
 *.log
 
 # third-party test files
-*test.py
+*test*.py
 **/.pytest_cache
 *.jpg
 .coverage
+.coveragerc
 infrastructure/ml/dumps/
+embeddings.*
 *hash.*

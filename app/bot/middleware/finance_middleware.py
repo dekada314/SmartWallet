@@ -41,39 +41,29 @@ class FinanceMiddleware(BaseMiddleware):
             ]:
                 self._audit_logger.info(
                     "[AUDIT] Вход в блок транзакций",
-                    extra={
-                        "user_id": token,
-                    },
+                    user_id=token,
                 )
 
             raw_state = data.get("raw_state")
             if raw_state and raw_state.startswith(("IncomeForm", "ExpenseForm")):
                 self._audit_logger.info(
-                    "[AUDIT] Начало обработки транзакции",
-                    extra={"user_id": token},
+                    "[AUDIT] Начало обработки транзакции", user_id=token
                 )
             result = await handler(event, data)
             duration_time = datetime.now() - start_time
 
         except ValidationError:
             self._audit_logger.error(
-                "[AUDIT] Ошибка валидации параметров транзакции",
-                extra={
-                    "user_id": token,
-                },
+                "[AUDIT] Ошибка валидации параметров транзакции", user_id=token
             )
 
         except TelegramAPIError:
             self._tg_api_logger.error(
-                f"[TG_API] Ошибка при обращение к API телеграмма",
-                extra={"user_id": token},
+                f"[TG_API] Ошибка при обращение к API телеграмма", user_id=token
             )
         except Exception:
             self._audit_logger.error(
-                f"[AUDIT] Ошибка обработки транзакции",
-                extra={
-                    "user_id": token,
-                },
+                f"[AUDIT] Ошибка обработки транзакции", user_id=token
             )
             raise
 
@@ -86,12 +76,10 @@ class FinanceMiddleware(BaseMiddleware):
 
             self._audit_logger.info(
                 "[AUDIT] Транзакция успешно обработана",
-                extra={
-                    "user_id": token,
-                    "amount": amount if amount else None,
-                    "operation_type": operation_type if operation_type else None,
-                    "duration_time": duration_time if duration_time else None,
-                },
+                user_id=token,
+                amount=amount,
+                operation_type=operation_type,
+                duration_time=duration_time,
             )
             return result
         finally:

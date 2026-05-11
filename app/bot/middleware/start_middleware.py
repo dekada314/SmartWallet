@@ -24,35 +24,28 @@ class StartMiddleware(BaseMiddleware):
 
             if result:
                 self._registry_log.info(
-                    "[REGISTRY] Пользователь успешно зарегистрирован",
-                    extra={"user_token": token},
+                    "[REGISTRY] Пользователь успешно зарегистрирован", user_id=token
                 )
 
             else:
                 self._registry_log.info(
                     "[REGISTRY] Попытка повторной регистрации пользователя",
-                    extra={"user_token": token},
+                    user_id=token,
                 )
             return result
+
         except ValidationError:
             self._registry_log.error(
-                "[REGISTRY] Ошибка регистрации пользователя",
-                extra={"user_token": token},
+                "[REGISTRY] Ошибка регистрации пользователя", user_id=token
             )
 
         except TelegramAPIError:
             self._tg_api_log.error(
-                f"[TG_API] Ошибка при обращение к API телеграмма",
-                extra={"user_id": token},
+                f"[TG_API] Ошибка при обращение к API телеграмма", user_id=token
             )
 
         except Exception:
-            self._registry_log.error(
-                f"[REGISTRY] Ошибка обработки цели",
-                extra={
-                    "user_id": token,
-                },
-            )
+            self._registry_log.error(f"[REGISTRY] Ошибка обработки цели", user_id=token)
             raise
 
         finally:

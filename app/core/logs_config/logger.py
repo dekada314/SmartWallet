@@ -37,8 +37,8 @@ class LogManager:
     def _create_json_formatter(self) -> structlog.stdlib.ProcessorFormatter:
         return structlog.stdlib.ProcessorFormatter(
             processor=structlog.processors.JSONRenderer(
-                serializer=lambda data: json.dumps(
-                    data, ensure_ascii=False, cls=CustomJSONEncoder
+                serializer=lambda data, **kwargs: json.dumps(
+                    data, ensure_ascii=False, cls=CustomJSONEncoder, **kwargs
                 )
             )
         )
@@ -95,7 +95,7 @@ class LogManager:
             "db": logging.ERROR,
             "tg_api": logging.ERROR,
         }
-        
+
         root_logger = logging.getLogger()
         root_logger.setLevel(logging.INFO)
         root_handler = self._build_rotate_handler("root.log", level=logging.INFO)
@@ -111,14 +111,13 @@ class LogManager:
             file_handler.setFormatter(json_formatter)
             logger.addHandler(file_handler)
 
-
         consoler_handler = logging.StreamHandler(stream=sys.stdout)
         consoler_handler.setLevel(logging.INFO)
         consoler_handler.setFormatter(console_formatter)
-        
+
         logging.getLogger("app").addHandler(consoler_handler)
 
         self._initialized = True
 
     def get_logger(self, name):
-        return logging.getLogger(name)
+        return structlog.get_logger(name)

@@ -1,8 +1,10 @@
 import functools
+from sqlite3 import DatabaseError
 
 from app.core.logs_config.logger import LogManager
 
 _main_logger = LogManager().get_logger("main")
+_db_logger = LogManager().get_logger("db")
 
 
 def use_case_logger(func):
@@ -11,7 +13,7 @@ def use_case_logger(func):
         method_name = func.__name__
         class_name = args[0].__class__.__name__
 
-        _main_logger.info(
+        _main_logger.debug(
             f"[USE CASE] Начало работы {class_name}.{method_name}",
         )
 
@@ -23,7 +25,7 @@ def use_case_logger(func):
             )
             raise
         else:
-            _main_logger.info(
+            _main_logger.debug(
                 f"[USE CASE] {class_name}.{method_name} успешно отработал"
             )
             return result
@@ -37,19 +39,20 @@ def repository_logger(func):
         method_name = func.__name__
         class_name = args[0].__class__.__name__
 
-        _main_logger.debug(
-            f"[REPOSITORY] Начало работы {class_name}.{method_name}", extra={}
-        )
+        _main_logger.debug(f"[REPOSITORY] Начало работы {class_name}.{method_name}")
 
         try:
             result = await func(*args, **kwargs)
+
+        except DatabaseError:
+            _db_logger.error(f"[REPOSITORY] Ошибка в работе бд", extra={})
         except Exception as e:
             _main_logger.exception(
                 f"[REPOSITORY] В работе {class_name}.{method_name} произошла ошибка {e}",
             )
             raise
         else:
-            _main_logger.info(
+            _main_logger.debug(
                 f"[REPOSITORY] {class_name}.{method_name} успешно отработал"
             )
             return result
@@ -75,7 +78,9 @@ def service_logger(func):
             )
             raise
         else:
-            _main_logger.info(f"[SERVICE] {class_name}.{method_name} успешно отработал")
+            _main_logger.debug(
+                f"[SERVICE] {class_name}.{method_name} успешно отработал"
+            )
             return result
 
     return wrapper
