@@ -47,6 +47,22 @@ class SQLiteTransactionRepository(BaseTransactionRepository):
         await db.execute(
             "CREATE INDEX IF NOT EXISTS index_user_order_number ON transactions(user_id, order_number)"
         )
+        await self._create_triggers()
+
+        await db.commit()
+
+    async def _create_triggers(self) -> None:
+        db = await self._get_db()
+
+        await db.execute("""
+                CREATE TRIGGER IF NOT EXISTS update_order_number_after_delete
+                AFTER DELETE ON transactions
+                BEGIN
+                    UPDATE transactions
+                    SET order_number = order_number - 1
+                    WHERE user_id = OLD.user_id AND order_number > OLD.order_number;
+                END;
+        """)
 
         await db.commit()
 
@@ -66,7 +82,7 @@ class SQLiteTransactionRepository(BaseTransactionRepository):
         db = await self._get_db()
         await db.execute(
             "INSERT OR REPLACE INTO transactions(id, user_id, order_number, category, amount, source_text, transaction_type, created_at) \
-            VALUES(:id, :user_id, :order_number, :category, :amount, :source_text, :transaction_type, :created_at)",
+            VALUES(:id, :user_id, :order_number, :category, :amount, :source_text, :transaction_type, :created_at)",  # пересмотреть id
             asdict(transaction),
         )
         await db.commit()

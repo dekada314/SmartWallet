@@ -1,7 +1,7 @@
-YAML_CATEGORIES = "infrastructure/knowledge_base/yaml/knowledge_base.yml"
-YAML_ADVICES = "infrastructure/knowledge_base/yaml/advices.yml"
+from pathlib import Path
 
-DB = "infrastructure/database/db/app.sqlite3"
-DATASET_PATH = "infrastructure/ml/classifier/dataset.csv"
-MODEL_PATH = "infrastructure/ml/dumps/model.joblib"
-VECTORIZER_PATH = "infrastructure/ml/dumps/vectorizer.joblib"
+root_dir = Path(__file__).resolve().parent.parent.parent
+INFRASTRUCTURE_PATH = root_dir / "infrastructure"
+
+KNOWLEDGE_BASE_PATH = INFRASTRUCTURE_PATH / "knowledge_base" / "yaml"
+DB = INFRASTRUCTURE_PATH / "database" / "db" / "app.sqlite3"

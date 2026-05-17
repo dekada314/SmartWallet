@@ -1,5 +1,5 @@
 from collections.abc import Awaitable, Callable
-from datetime import datetime
+from time import perf_counter
 from typing import Any
 
 from aiogram import BaseMiddleware
@@ -26,15 +26,29 @@ class GoalMiddleware(BaseMiddleware):
         data: dict[str, Any],
     ) -> None:
         corr_context = CorrelationContext.set()
-        token = None
         duration_time = None
+        start_time = perf_counter()
         try:
-            start_time = datetime.now()
-            token = await self._tokenizer.get_token(user_id=event.from_user.id)
+            if hasattr(event, "from_user") and event.from_user:
+                user_id = event.from_user.id
+                token = await self._tokenizer.get_token(user_id=user_id)
+            else:
+                user_id = "unknown"
+                token = "unknown"
+
             if isinstance(event, Message) and event.text == "Цели":
                 self._main_log.info("[GOAL] Вход в рездел целей", user_id=token)
+
             result = await handler(event, data)
-            duration_time = datetime.now() - start_time
+            duration_time = perf_counter() - start_time
+
+            self._main_log.info(
+                "[GOAL] Обработка целей закончена успешно",
+                user_id=token,
+                duration_time=duration_time,
+            )
+            return result
+
         except ValidationError:
             self._main_log.error(
                 "[GOAL] Ошибка валидации параметров цели", user_id=token
@@ -47,14 +61,5 @@ class GoalMiddleware(BaseMiddleware):
         except Exception:
             self._main_log.error(f"[GOAL] Ошибка обработки целей", user_id=token)
             raise
-
-        else:
-            self._main_log.info(
-                "[GOAL] Обработка целей закончена успешно",
-                user_id=token,
-                duration_time=duration_time,
-            )
-            return result
-
         finally:
             CorrelationContext.reset(corr_context)

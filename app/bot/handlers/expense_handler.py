@@ -81,8 +81,6 @@ class ExpenseHandler:
                     user_id=message.from_user.id, text=message.text
                 )
 
-                await state.update_data(operation_type="expense")
-
                 transaction_response: TransactionReponse = (
                     await self.add_expense_us.execute(transaction_request)
                 )
@@ -100,6 +98,12 @@ class ExpenseHandler:
                 await message.answer("Вы некорректно ввели данные!")
             finally:
                 await state.clear()
+
+            return (
+                ("EXPENSE", transaction_response.transaction.amount)
+                if transaction_response
+                else None
+            )
 
         # --------------------------
 
@@ -137,8 +141,6 @@ class ExpenseHandler:
                 user_id=message.from_user.id, text=amount, category=user_category
             )
 
-            await state.update_data(operation_type="expense")
-
             transaction_response: TransactionReponse = (
                 await self.add_expense_us.execute(transaction_response)
             )
@@ -153,6 +155,11 @@ class ExpenseHandler:
                     await message.answer(warning)
 
             await state.clear()
+            return (
+                ("EXPENSE", transaction_response.transaction.amount)
+                if transaction_response
+                else None
+            )
 
         # ---------------------
 

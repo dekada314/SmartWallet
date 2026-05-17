@@ -1,5 +1,6 @@
 from dataclasses import dataclass, field
 from datetime import datetime
+from zoneinfo import ZoneInfo
 
 from domain.enums.transaction_type import TransactionType
 
@@ -12,5 +13,5 @@ class Transaction:
     amount: float
     source_text: str | None
     transaction_type: TransactionType
-    created_at: datetime = field(default_factory=datetime.now)
+    created_at: datetime = field(default_factory= lambda: datetime.now(ZoneInfo("Europe/Moscow")))
     id: int | None = None

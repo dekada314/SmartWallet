@@ -1,0 +1,68 @@
+ontology:
+  categories:
+    - id: "food"
+      name: "Еда"
+      is_essential: true
+      priority: 1
+    - id: "for_home"
+      name: "Для дома"
+      is_essential: false
+      priority: 3
+    - id: "takeaway_food"
+      name: "Готовая еда"
+      parent: "food"
+      is_essential: false
+      priority: 4
+    - id: "monthly_payments"
+      name: "Ежемесячные платежи"
+      is_essential: true
+      priority: 1
+    - id: "transport"
+      name: "Транспорт"
+      is_essential: true
+      priority: 2
+    - id: "education"
+      name: "Образование"
+      is_essential: true
+      priority: 2
+    - id: "entertainment"
+      name: "Развлечения"
+      is_essential: false
+      priority: 5
+    - id: "shopping"
+      name: "Шопинг"
+      is_essential: false
+      priority: 3
+    - id: "technic"
+      name: "Техника и инструменты"
+      is_essential: false
+      priority: 4
+    - id: "addiction"
+      name: "Зависимости"
+      is_essential: false
+      priority: 5
+    - id: "hobby"
+      name: "Хобби"
+      is_essential: false
+      priority: 4
+    - id: "chancellery"
+      name: "Канцелярия"
+      is_essential: true
+      priority: 3
+    - id: "household_chemicals"
+      name: "Бытовая химия"
+      is_essential: true
+      priority: 3
+    - id: "health"
+      name: "Здоровье"
+      description: "Аптеки, врачи, анализы, стоматология"
+      is_essential: true
+      priority: 1  
+    - id: "beauty"
+      name: "Красота"
+      is_essential: false
+      priority: 4
+    - id: "digital_services"
+      name: "Сервисы и подписки"
+      is_essential: false
+      priority: 4

@@ -4,6 +4,7 @@ import os
 import sys
 from datetime import datetime
 from logging.handlers import RotatingFileHandler
+from datetime import timezone, timedelta, datetime
 
 import structlog
 
@@ -51,7 +52,12 @@ class LogManager:
     def _add_correlation_id(self, _, __, event_dict):
         event_dict["corelation_id"] = CorrelationContext.get()
         return event_dict
-
+    
+    def _get_moscow_timestamp(self, _, __, event_dict):
+        moscow_tz = timezone(timedelta(hours=3))
+        event_dict["timestamp"] = datetime.now(moscow_tz).isoformat()
+        return event_dict
+    
     def _build_rotate_handler(
         self, filename, level=logging.INFO
     ) -> RotatingFileHandler:
@@ -74,7 +80,7 @@ class LogManager:
                 structlog.stdlib.add_log_level,
                 structlog.stdlib.filter_by_level,
                 structlog.stdlib.add_logger_name,
-                structlog.processors.TimeStamper(fmt="iso"),
+                self._get_moscow_timestamp,
                 structlog.processors.StackInfoRenderer(),
                 structlog.processors.format_exc_info,
                 structlog.stdlib.ProcessorFormatter.wrap_for_formatter,

@@ -1,5 +1,5 @@
 from collections.abc import Awaitable, Callable
-from datetime import datetime
+from time import perf_counter
 from typing import Any
 
 from aiogram import BaseMiddleware
@@ -27,14 +27,18 @@ class FinanceMiddleware(BaseMiddleware):
         data: dict[str, Any],
     ):
         corr_context = CorrelationContext.set()
-        start_time = datetime.now()
+        start_time = perf_counter()
         duration_time = None
-        token = None
         amount = None
         operation_type = None
         try:
-            user_id = event.from_user.id
-            token = await self._tokenizer.get_token(user_id=user_id)
+            if hasattr(event, "from_user") and event.from_user:
+                user_id = event.from_user.id
+                token = await self._tokenizer.get_token(user_id=user_id)
+            else:
+                user_id = "unknown"
+                token = "unknown"
+
             if isinstance(event, Message) and event.text in [
                 "Ввести доход",
                 "Ввести расход",
@@ -44,43 +48,46 @@ class FinanceMiddleware(BaseMiddleware):
                     user_id=token,
                 )
 
-            raw_state = data.get("raw_state")
-            if raw_state and raw_state.startswith(("IncomeForm", "ExpenseForm")):
-                self._audit_logger.info(
-                    "[AUDIT] Начало обработки транзакции", user_id=token
-                )
+            state: FSMContext = data.get("state")
+            if state:
+                current_state = await state.get_state()
+                if current_state and current_state.startswith(
+                    ("IncomeForm", "ExpenseForm")
+                ):
+                    self._audit_logger.info(
+                        "[AUDIT] Начало обработки транзакции", user_id=token
+                    )
+
             result = await handler(event, data)
-            duration_time = datetime.now() - start_time
+            duration_time = perf_counter() - start_time
+
+            if result:
+                operation_type, amount = result
+
+                self._audit_logger.info(
+                    "[AUDIT] Транзакция успешно обработана",
+                    user_id=token,
+                    amount=amount,
+                    operation_type=operation_type,
+                    duration_time=duration_time,
+                )
+            return result
 
         except ValidationError:
             self._audit_logger.error(
                 "[AUDIT] Ошибка валидации параметров транзакции", user_id=token
             )
+            raise
 
         except TelegramAPIError:
             self._tg_api_logger.error(
                 f"[TG_API] Ошибка при обращение к API телеграмма", user_id=token
             )
+            raise
         except Exception:
             self._audit_logger.error(
                 f"[AUDIT] Ошибка обработки транзакции", user_id=token
             )
             raise
-
-        else:
-            state: FSMContext = data.get("state")
-            if state:
-                state_data = await state.get_data()
-                amount = state_data.get("amount", None)
-                operation_type = state_data.get("operation_type", None)
-
-            self._audit_logger.info(
-                "[AUDIT] Транзакция успешно обработана",
-                user_id=token,
-                amount=amount,
-                operation_type=operation_type,
-                duration_time=duration_time,
-            )
-            return result
         finally:
             CorrelationContext.reset(corr_context)

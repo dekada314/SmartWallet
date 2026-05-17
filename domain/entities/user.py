@@ -1,5 +1,6 @@
 from dataclasses import dataclass, field
 from datetime import date, datetime
+from zoneinfo import ZoneInfo
 
 
 @dataclass(slots=True)
@@ -8,9 +9,7 @@ class User:
     user_name: str
     balance: float
     created_at: date
-    last_action: str = field(
-        default_factory=lambda: datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    )
+    last_action: datetime = field(default_factory= lambda: datetime.now(ZoneInfo("Europe/Moscow")))
 
     def __post_init__(self):
         if self.user_id < 0:

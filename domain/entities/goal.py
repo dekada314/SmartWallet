@@ -1,5 +1,6 @@
 from dataclasses import dataclass, field
 from datetime import datetime
+from zoneinfo import ZoneInfo
 
 
 @dataclass(slots=True)
@@ -9,7 +10,7 @@ class Goal:
     target: float
     curr_bill: float
     text: str
-    created_at: datetime = field(default_factory=datetime.now)
+    created_at: datetime = field(default_factory= lambda: datetime.now(ZoneInfo("Europe/Moscow")))
     id: int | None = None
 
     def __post_init__(self):

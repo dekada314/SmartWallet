@@ -107,7 +107,7 @@ class GoalHandler:
                 await state.set_state(GoalForm.waiting_for_goal)
             else:
                 await callback.message.answer(
-                    "У вас уже целых 5 целей, предлагаю пока что сфокусироваться на уже существующих"
+                    "У вас уже целых 5 целей, предлагаю пока что сфокусироваться на уже существующих."
                 )
 
         @self.router.message(GoalForm.waiting_for_goal)

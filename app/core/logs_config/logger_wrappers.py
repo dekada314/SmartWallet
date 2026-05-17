@@ -44,8 +44,11 @@ def repository_logger(func):
         try:
             result = await func(*args, **kwargs)
 
-        except DatabaseError:
-            _db_logger.error(f"[REPOSITORY] Ошибка в работе бд", extra={})
+        except DatabaseError as e:
+            _db_logger.error(
+                f"[REPOSITORY] Ошибка в работе бд, {class_name}.{method_name}: {e}",
+                params=args,
+            )
         except Exception as e:
             _main_logger.exception(
                 f"[REPOSITORY] В работе {class_name}.{method_name} произошла ошибка {e}",
@@ -66,9 +69,7 @@ def service_logger(func):
         method_name = func.__name__
         class_name = args[0].__class__.__name__
 
-        _main_logger.debug(
-            f"[SERVICE] Начало работы {class_name}.{method_name}", extra={}
-        )
+        _main_logger.debug(f"[SERVICE] Начало работы {class_name}.{method_name}")
 
         try:
             result = await func(*args, **kwargs)

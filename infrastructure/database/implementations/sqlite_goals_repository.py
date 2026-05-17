@@ -12,7 +12,7 @@ class SqliteGoalsRepository(BaseGoalsRepository):
         self.db_path = db_path
         self._db: aiosqlite.Connection | None = None
 
-    async def _get_db(self):
+    async def _get_db(self) -> aiosqlite.Connection:
         if self._db is None:
             self._db = await aiosqlite.connect(self.db_path)
             self._db.row_factory = aiosqlite.Row
@@ -52,6 +52,22 @@ class SqliteGoalsRepository(BaseGoalsRepository):
             "CREATE INDEX IF NOT EXISTS index_goals_user_orders ON goals(user_id, order_number);"
         )
 
+        await self._create_triggers()
+
+        await db.commit()
+
+    async def _create_triggers(self) -> None:
+        db = await self._get_db()
+
+        await db.execute("""
+            CREATE TRIGGER IF NOT EXISTS update_ordere_numbers_after_delete
+            AFTER DELETE ON goals
+            BEGIN
+                UPDATE goals
+                SET order_number = order_number - 1
+                WHERE user_id = OLD.user_id AND order_number > OLD.order_number;
+            END;
+        """)
         await db.commit()
 
     @repository_logger

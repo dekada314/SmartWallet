@@ -2,7 +2,10 @@ import asyncio
 import os
 
 from aiogram import Bot, Dispatcher
+from aiogram.fsm.storage.redis import RedisStorage
 from dotenv import load_dotenv
+
+from app.core.redis.redis_client import RedisClient
 
 load_dotenv()
 
@@ -54,10 +57,11 @@ async def main():
     await user_db.init_db()
     transaction_db = SQLiteTransactionRepository(settings.DB)
     await transaction_db.init_db()
-    categories_kb = YamlCategoriesRepository(settings.YAML_CATEGORIES)
-    advices_kb = YamlAdvicesRepository(settings.YAML_ADVICES)
     goal_db = SqliteGoalsRepository(settings.DB)
     await goal_db.init_db()
+
+    categories_kb = YamlCategoriesRepository(settings.KNOWLEDGE_BASE_PATH)
+    advices_kb = YamlAdvicesRepository(settings.KNOWLEDGE_BASE_PATH)
 
     text_processing = TextProcessing(
         cat_examples=categories_kb.get_all_categories_examples()
@@ -99,8 +103,10 @@ async def main():
     statistics_handler = StatisticsHandler(statistics_us)
     statistics_handler.register()
 
+    redis_storage = RedisStorage(redis=await RedisClient().get_client())
+
     bot = Bot(os.getenv("BOT_TOKEN"))
-    dp = Dispatcher()
+    dp = Dispatcher(storage=redis_storage)
 
     scheduler = APSCheduler(goal_db, bot)
     scheduler.start()

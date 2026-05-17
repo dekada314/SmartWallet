@@ -16,10 +16,14 @@ class StartMiddleware(BaseMiddleware):
 
     async def __call__(self, handler, event, data):
         corr_context = CorrelationContext.set()
-        token = None
         try:
-            user_id = event.from_user.id
-            token = await self._tokenizer.get_token(user_id=user_id)
+            if hasattr(event, "from_user") and event.from_user:
+                user_id = event.from_user.id
+                token = await self._tokenizer.get_token(user_id=user_id)
+            else:
+                user_id = "unknown"
+                token = "unknown"
+
             result = await handler(event, data)
 
             if result:
@@ -38,14 +42,18 @@ class StartMiddleware(BaseMiddleware):
             self._registry_log.error(
                 "[REGISTRY] Ошибка регистрации пользователя", user_id=token
             )
+            raise
 
         except TelegramAPIError:
             self._tg_api_log.error(
                 f"[TG_API] Ошибка при обращение к API телеграмма", user_id=token
             )
+            raise
 
         except Exception:
-            self._registry_log.error(f"[REGISTRY] Ошибка обработки цели", user_id=token)
+            self._registry_log.error(
+                f"[REGISTRY] Ошибка обработки регистрации", user_id=token
+            )
             raise
 
         finally:

@@ -1,0 +1,17 @@
+wastes:
+  food: 450 
+  monthly_payments: 60
+  transport: 90
+  takeaway_food: 50
+  shopping: 120
+  health: 200
+  entertainment: 100
+  technic: 50
+  addiction: 30
+  hobby: 50
+  chancellery: 20
+  household_chemicals: 20
+  beauty: 120
+  digital_services: 30
+  education: 70
+  for_home: 50  

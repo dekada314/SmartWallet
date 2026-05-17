@@ -32,10 +32,6 @@ class IncomeHandler:
                 income_dto = SaveIncomeRequest(
                     user_id=message.from_user.id, amount=message.text
                 )
-                await state.update_data(
-                    amount=income_dto.amount, operation_type="income"
-                )
-
                 new_balance = await self.add_income_us.execute(income_dto=income_dto)
                 if new_balance:
                     await message.answer(
@@ -45,3 +41,5 @@ class IncomeHandler:
                 await message.answer(f"Возникла ошибка, введите корректные данные")
             except GettingUserError:
                 await message.answer(f"Для начала зарегистрируйтесь через /start")
+
+            return ("INCOME", income_dto.amount) if income_dto.amount else None

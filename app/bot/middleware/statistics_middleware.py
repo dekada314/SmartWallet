@@ -29,9 +29,11 @@ class StatisticsMiddleware(BaseMiddleware):
         start_time = datetime.now()
         duration_time = None
         token = None
-        user_id = event.from_user.id
         try:
-            token = await self._tokenizer.get_token(user_id=user_id)
+            if hasattr(event, "from_user") and event.from_user:
+                user_id = event.from_user.id
+                token = await self._tokenizer.get_token(user_id=user_id)
+
             if isinstance(event, Message) and event.text == "Статистика":
                 self._main_log.info("[STATS] Вход в блок статистики", user_id=token)
                 result = await handler(event, data)
